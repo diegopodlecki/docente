@@ -1,0 +1,18 @@
+{
+  "status": "commited",
+  "type": "frontend",
+  "scope": "codebase",
+  "localEndpoint": "http://localhost:5173/index.html",
+  "executionArgs": {
+    "projectName": "docente",
+    "projectPath": "d:\\docente",
+    "testIds": [],
+    "additionalInstruction": "The app is a static HTML page served by http-server. There is no build step. The login is a simple name input on first visit (no email/password). Clear localStorage before tests to simulate first visit. The app uses Spanish language.",
+    "serverMode": "production",
+    "envs": {
+      "API_KEY": "sk-user-XsS5aNVRKsR8tRu7nUAT3Sobna2ca3eAXkOzpwzGhJuJm062b40kUN-nyswP__ORFH0Fc5HdebjfvmwWLOwGP5rqMxrf18mpz41oPY_tKEvxxqkjxYVy2wldP-tH1DNldqY"
+    }
+  },
+  "serverPort": 51311,
+  "proxy": "http://c2011783-4f58-4872-9429-b35e4f6b9e1c:D5lFgE0H8vrSBzU0V8N1QrAlEZdqGVAF@tun.testsprite.com:8080"
+}

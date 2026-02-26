@@ -1,0 +1,1272 @@
+[
+  {
+    "id": "TC001",
+    "title": "Repeated click on the same nav button does not break the view (Notas)",
+    "description": "Verifies clicking the currently active nav button again keeps the same view visible and stable.",
+    "category": "Navigation",
+    "priority": "Low",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to \"/index.html\""
+      },
+      {
+        "type": "action",
+        "description": "Click \"Notas\" nav button to view grades/performance"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"view-notas section\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Notas\" nav button to view grades/performance"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"view-notas section\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"8.5\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC002",
+    "title": "View Cursos list and course card details",
+    "description": "Verifies the Cursos view loads and shows course cards with expected summary fields.",
+    "category": "Course Management",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /index.html"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Cursos\" nav button to view courses"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Cursos\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"course list\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"a course card\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"course card progress indicator\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC003",
+    "title": "Open Add Course modal from Cursos view",
+    "description": "Verifies the Add Course modal opens and shows required fields and actions.",
+    "category": "Course Management",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /index.html"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Cursos\" nav button to view courses"
+      },
+      {
+        "type": "action",
+        "description": "Click \"+\" button to open Add Course modal"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Añadir curso\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"course name input\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"schedule input\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Añadir\" button is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Cancelar\" button is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC004",
+    "title": "Create a new course successfully and see it in the list",
+    "description": "Verifies a course can be created from the modal and appears in the Cursos list with default values.",
+    "category": "Course Management",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /index.html"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Cursos\" nav button to view courses"
+      },
+      {
+        "type": "action",
+        "description": "Click \"+\" button to open Add Course modal"
+      },
+      {
+        "type": "action",
+        "description": "Fill \"Algebra I - E2E\" into course name input"
+      },
+      {
+        "type": "action",
+        "description": "Fill \"Lun y Mié 08:00\" into schedule input"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Añadir\" button to create new course"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Curso añadido\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Algebra I - E2E\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC005",
+    "title": "Newly created course shows schedule and default progress",
+    "description": "Verifies the new course card displays the entered schedule and default progress value (0%).",
+    "category": "Course Management",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /index.html"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Cursos\" nav button to view courses"
+      },
+      {
+        "type": "action",
+        "description": "Click \"+\" button to open Add Course modal"
+      },
+      {
+        "type": "action",
+        "description": "Fill \"Historia - Progreso 0\" into course name input"
+      },
+      {
+        "type": "action",
+        "description": "Fill \"Vie 10:30\" into schedule input"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Añadir\" button to create new course"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Historia - Progreso 0\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Vie 10:30\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"0%\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC006",
+    "title": "Cancel Add Course modal without saving",
+    "description": "Verifies Cancel closes the modal and no new course is added.",
+    "category": "Course Management",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /index.html"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Cursos\" nav button to view courses"
+      },
+      {
+        "type": "action",
+        "description": "Click \"+\" button to open Add Course modal"
+      },
+      {
+        "type": "action",
+        "description": "Fill \"Curso No Guardado\" into course name input"
+      },
+      {
+        "type": "action",
+        "description": "Fill \"Mar 12:00\" into schedule input"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Cancelar\" to close modal without saving"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Añadir curso modal\" is not visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Curso No Guardado\" is not visible"
+      }
+    ]
+  },
+  {
+    "id": "TC007",
+    "title": "Validation: missing course name shows error and prevents creation",
+    "description": "Verifies leaving the course name blank triggers an error toast and does not add a course.",
+    "category": "Course Management",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /index.html"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Cursos\" nav button to view courses"
+      },
+      {
+        "type": "action",
+        "description": "Click \"+\" button to open Add Course modal"
+      },
+      {
+        "type": "action",
+        "description": "Fill \"Lun 09:00\" into schedule input"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Añadir\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Nombre\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"obligatorio\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Añadir curso modal\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC008",
+    "title": "Validation recovery: add course after initial missing-name error",
+    "description": "Verifies user can correct the missing name after an error and successfully create the course.",
+    "category": "Course Management",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /index.html"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Cursos\" nav button to view courses"
+      },
+      {
+        "type": "action",
+        "description": "Click \"+\" button to open Add Course modal"
+      },
+      {
+        "type": "action",
+        "description": "Fill \"Jue 11:00\" into schedule input"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Añadir\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"obligatorio\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Fill \"Curso Recuperado\" into course name input"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Añadir\" button to create new course"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Curso añadido\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Curso Recuperado\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC009",
+    "title": "Toast appears after course creation and modal closes",
+    "description": "Verifies a success toast is shown and the Add Course modal is dismissed after creating a course.",
+    "category": "Course Management",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /index.html"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Cursos\" nav button to view courses"
+      },
+      {
+        "type": "action",
+        "description": "Click \"+\" button to open Add Course modal"
+      },
+      {
+        "type": "action",
+        "description": "Fill \"Curso Toast\" into course name input"
+      },
+      {
+        "type": "action",
+        "description": "Fill \"Sáb 08:15\" into schedule input"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Añadir\" button to create new course"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Curso añadido\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Añadir curso modal\" is not visible"
+      }
+    ]
+  },
+  {
+    "id": "TC010",
+    "title": "Mark a student as presente and finalize the attendance register for a selected course",
+    "description": "Verifies a teacher can switch to Asistencia, select a course, mark a student as presente, and finalize the register with visible confirmation.",
+    "category": "Attendance Tracking",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /index.html"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Asistencia\" nav button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Asistencia\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click a course filter to switch to a different course than the default"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"list of students with attendance status\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click green check button next to a student to mark student as \"presente\""
+      },
+      {
+        "type": "action",
+        "description": "Click \"Finalizar Registro\" button to confirm attendance"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Registro\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC011",
+    "title": "Mark a student as ausente, then change to presente, and finalize",
+    "description": "Verifies attendance status can be changed before finalizing and the UI reflects the latest choice.",
+    "category": "Attendance Tracking",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /index.html"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Asistencia\" nav button"
+      },
+      {
+        "type": "action",
+        "description": "Click a course filter to switch to the target course"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"list of students with attendance status\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click red X button next to a student to mark student as \"ausente\""
+      },
+      {
+        "type": "action",
+        "description": "Click green check button next to the same student to mark student as \"presente\""
+      },
+      {
+        "type": "action",
+        "description": "Click \"Finalizar Registro\" button to confirm attendance"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Finalizar Registro\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC012",
+    "title": "Switch courses and verify the student list updates for the selected course",
+    "description": "Verifies the course filter changes the visible attendance list context so the teacher is tracking the intended course.",
+    "category": "Attendance Tracking",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /index.html"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Asistencia\" nav button"
+      },
+      {
+        "type": "action",
+        "description": "Click a course filter to switch to course A"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"list of students with attendance status\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click a different course filter to switch to course B"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"list of students with attendance status\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC013",
+    "title": "Finalize register with no attendance changes made",
+    "description": "Verifies the teacher can finalize the register even if no student attendance buttons were clicked, and the UI responds gracefully.",
+    "category": "Attendance Tracking",
+    "priority": "Low",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /index.html"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Asistencia\" nav button"
+      },
+      {
+        "type": "action",
+        "description": "Click a course filter to switch to the target course"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"list of students with attendance status\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Finalizar Registro\" button to confirm attendance"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Finalizar Registro\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC014",
+    "title": "Create a new task from '+ Nueva' and verify it appears in Pending with due date",
+    "description": "Verifies a user can create a task with a title and due date and see it listed in the pending tasks with the due date displayed.",
+    "category": "Task Management",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /index.html"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Tareas\" nav button"
+      },
+      {
+        "type": "action",
+        "description": "Click \"+ Nueva\" button to open Add Task modal"
+      },
+      {
+        "type": "action",
+        "description": "Fill task title input with \"Tarea E2E - Matemáticas\""
+      },
+      {
+        "type": "action",
+        "description": "Fill due date input with \"2026-03-15\""
+      },
+      {
+        "type": "action",
+        "description": "Click \"Crear\" button to create task"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Tarea E2E - Matemáticas\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"2026-03-15\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC015",
+    "title": "Validate required title: blank title shows error and task is not created",
+    "description": "Verifies creating a task without a title shows a visible error/validation message and does not add a new task to the list.",
+    "category": "Task Management",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /index.html"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Tareas\" nav button"
+      },
+      {
+        "type": "action",
+        "description": "Click \"+ Nueva\" button to open Add Task modal"
+      },
+      {
+        "type": "action",
+        "description": "Fill task title input with \"\""
+      },
+      {
+        "type": "action",
+        "description": "Fill due date input with \"2026-03-20\""
+      },
+      {
+        "type": "action",
+        "description": "Click \"Crear\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Add Task\" modal is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Tarea E2E -\" is not visible"
+      }
+    ]
+  },
+  {
+    "id": "TC016",
+    "title": "Complete a pending task using 'Marcar Finalizada' and verify it moves to Completed",
+    "description": "Verifies a user can mark a pending task as completed and then see it in the completed tasks list.",
+    "category": "Task Management",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /index.html"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Tareas\" nav button"
+      },
+      {
+        "type": "action",
+        "description": "Click \"+ Nueva\" button to open Add Task modal"
+      },
+      {
+        "type": "action",
+        "description": "Fill task title input with \"Tarea para completar\""
+      },
+      {
+        "type": "action",
+        "description": "Fill due date input with \"2026-03-10\""
+      },
+      {
+        "type": "action",
+        "description": "Click \"Crear\" button to create task"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Marcar Finalizada\" for task \"Tarea para completar\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Reabrir\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC017",
+    "title": "Reopen a completed task using 'Reabrir' and verify it returns to Pending",
+    "description": "Verifies a user can reopen a completed task and see it return to the pending task list.",
+    "category": "Task Management",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /index.html"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Tareas\" nav button"
+      },
+      {
+        "type": "action",
+        "description": "Click \"+ Nueva\" button to open Add Task modal"
+      },
+      {
+        "type": "action",
+        "description": "Fill task title input with \"Tarea para reabrir\""
+      },
+      {
+        "type": "action",
+        "description": "Fill due date input with \"2026-03-11\""
+      },
+      {
+        "type": "action",
+        "description": "Click \"Crear\" button to create task"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Marcar Finalizada\" for task \"Tarea para reabrir\""
+      },
+      {
+        "type": "action",
+        "description": "Click \"Reabrir\" for task \"Tarea para reabrir\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Marcar Finalizada\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC018",
+    "title": "Open Add Task modal using dashed 'Nueva Tarea' button at bottom",
+    "description": "Verifies the alternate dashed 'Nueva Tarea' button opens the Add Task modal and allows task creation.",
+    "category": "Task Management",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /index.html"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Tareas\" nav button"
+      },
+      {
+        "type": "action",
+        "description": "Scroll to the bottom of the tasks view"
+      },
+      {
+        "type": "action",
+        "description": "Click dashed \"Nueva Tarea\" button at bottom"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Add Task\" modal is visible"
+      },
+      {
+        "type": "action",
+        "description": "Fill task title input with \"Tarea creada desde botón inferior\""
+      },
+      {
+        "type": "action",
+        "description": "Click \"Crear\" button to create task"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Tarea creada desde botón inferior\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC019",
+    "title": "Create multiple tasks and verify both appear in Pending list",
+    "description": "Verifies the tasks list can display more than one pending task created in the same session.",
+    "category": "Task Management",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /index.html"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Tareas\" nav button"
+      },
+      {
+        "type": "action",
+        "description": "Click \"+ Nueva\" button to open Add Task modal"
+      },
+      {
+        "type": "action",
+        "description": "Fill task title input with \"Tarea A\""
+      },
+      {
+        "type": "action",
+        "description": "Click \"Crear\" button to create task"
+      },
+      {
+        "type": "action",
+        "description": "Click \"+ Nueva\" button to open Add Task modal"
+      },
+      {
+        "type": "action",
+        "description": "Fill task title input with \"Tarea B\""
+      },
+      {
+        "type": "action",
+        "description": "Click \"Crear\" button to create task"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Tarea A\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Tarea B\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC020",
+    "title": "Cancel/close Add Task modal without creating a task",
+    "description": "Verifies the user can dismiss the Add Task modal and no new task is added when the modal is closed without creating.",
+    "category": "Task Management",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /index.html"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Tareas\" nav button"
+      },
+      {
+        "type": "action",
+        "description": "Click \"+ Nueva\" button to open Add Task modal"
+      },
+      {
+        "type": "action",
+        "description": "Fill task title input with \"Tarea que no debe crearse\""
+      },
+      {
+        "type": "action",
+        "description": "Press \"Escape\" key"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Add Task\" modal is not visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Tarea que no debe crearse\" is not visible"
+      }
+    ]
+  },
+  {
+    "id": "TC021",
+    "title": "Create a task with title containing accents and punctuation",
+    "description": "Verifies task titles with Spanish characters and punctuation render correctly in the pending list.",
+    "category": "Task Management",
+    "priority": "Low",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /index.html"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Tareas\" nav button"
+      },
+      {
+        "type": "action",
+        "description": "Click \"+ Nueva\" button to open Add Task modal"
+      },
+      {
+        "type": "action",
+        "description": "Fill task title input with \"Lectura: 'El niño' – capítulo 3\""
+      },
+      {
+        "type": "action",
+        "description": "Fill due date input with \"2026-04-01\""
+      },
+      {
+        "type": "action",
+        "description": "Click \"Crear\" button to create task"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Lectura: 'El niño' – capítulo 3\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"2026-04-01\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC022",
+    "title": "Open Notas view and verify performance summary widgets are visible",
+    "description": "Verifies the Grades/Performance view loads and shows key summary metrics for students and tasks.",
+    "category": "Grades / Performance View",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /index.html"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Notas\" nav button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Notas\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Total\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Estudiantes\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Tareas\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC023",
+    "title": "Verify total students count is displayed in Notas view",
+    "description": "Ensures the Notas view displays a visible total students count value.",
+    "category": "Grades / Performance View",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /index.html"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Notas\" nav button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Total\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Estudiantes\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Total students count value\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Total students count value\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC024",
+    "title": "Verify completed/total tasks ratio is displayed in Notas view",
+    "description": "Ensures the Notas view shows a completed/total tasks ratio as a visible value.",
+    "category": "Grades / Performance View",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /index.html"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Notas\" nav button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Tareas\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Completed tasks ratio value\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"/\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Total tasks value\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC025",
+    "title": "Verify average grade per course shows 8.5 for each listed course",
+    "description": "Validates that each course average in the Notas view displays the hardcoded value 8.5.",
+    "category": "Grades / Performance View",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /index.html"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Notas\" nav button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Promedio\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"8.5\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Course average grade list\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"8.5\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC026",
+    "title": "Notas view content is accessible after switching away and back using bottom navigation",
+    "description": "Verifies the Notas view can be re-entered via navigation and still shows the performance metrics.",
+    "category": "Grades / Performance View",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /index.html"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Notas\" nav button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Notas\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Cursos\" nav button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Cursos\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Notas\" nav button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"8.5\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC027",
+    "title": "Notas view renders without course data-dependent errors (baseline visibility checks)",
+    "description": "Checks that the Notas view shows the averages section and does not appear empty or broken.",
+    "category": "Grades / Performance View",
+    "priority": "Low",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /index.html"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Notas\" nav button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Course average grade list\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Promedio\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"8.5\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Exportar Excel\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC028",
+    "title": "Enable dark mode from header toggle",
+    "description": "Verifies the user can switch from light mode to dark mode using the moon/sun icon in the header.",
+    "category": "Dark Mode Toggle",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /index.html"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"moon/sun icon button in the header\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"moon/sun icon button in the header\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"sun icon in the header (indicating dark mode is enabled)\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Cursos\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC029",
+    "title": "Disable dark mode and return to light mode",
+    "description": "Verifies the user can switch back from dark mode to light mode using the same header toggle.",
+    "category": "Dark Mode Toggle",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /index.html"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"moon/sun icon button in the header\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"sun icon in the header (indicating dark mode is enabled)\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"moon/sun icon button in the header\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"moon icon in the header (indicating light mode is enabled)\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC030",
+    "title": "Dark mode preference persists after reload",
+    "description": "Verifies dark mode remains enabled after reloading the app when localStorage is intact.",
+    "category": "Dark Mode Toggle",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /index.html"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"moon/sun icon button in the header\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"sun icon in the header (indicating dark mode is enabled)\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /index.html"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"sun icon in the header (indicating dark mode is enabled)\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/index.html\""
+      }
+    ]
+  },
+  {
+    "id": "TC031",
+    "title": "Light mode preference persists after reload",
+    "description": "Verifies light mode remains enabled after reloading the app when localStorage is intact.",
+    "category": "Dark Mode Toggle",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /index.html"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"moon/sun icon button in the header\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"moon/sun icon button in the header\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"moon icon in the header (indicating light mode is enabled)\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /index.html"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"moon icon in the header (indicating light mode is enabled)\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC032",
+    "title": "Dark mode toggle works from any main view",
+    "description": "Verifies the theme toggle is accessible and works after navigating within the single-page app.",
+    "category": "Dark Mode Toggle",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /index.html"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Asistencia\" in the bottom navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Asistencia\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"moon/sun icon button in the header\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"sun icon in the header (indicating dark mode is enabled)\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Notas\" in the bottom navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Notas\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC033",
+    "title": "Rapid repeated toggling ends in correct final state (dark)",
+    "description": "Verifies multiple quick toggles do not break the UI and the final theme state matches the last click.",
+    "category": "Dark Mode Toggle",
+    "priority": "Low",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /index.html"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"moon/sun icon button in the header\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"moon/sun icon button in the header\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"moon/sun icon button in the header\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"sun icon in the header (indicating dark mode is enabled)\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Tareas\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC034",
+    "title": "Settings menu exposes both backup and restore actions",
+    "description": "Verifies that the settings menu provides visible actions for both backing up and restoring data.",
+    "category": "Data Backup and Restore",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /index.html"
+      },
+      {
+        "type": "action",
+        "description": "Click settings gear icon in header"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Copia de Seguridad\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Restaurar Copia\" is visible"
+      }
+    ]
+  }
+]

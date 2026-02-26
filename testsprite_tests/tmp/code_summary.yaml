@@ -1,0 +1,130 @@
+version: "2"
+type: frontend
+tech_stack:
+  - HTML5
+  - JavaScript (Vanilla)
+  - TailwindCSS (CDN)
+  - Google Fonts (Lexend)
+  - Material Symbols (Google Icons)
+  - PWA (manifest.json, service worker ready)
+routes:
+  - path: /index.html
+    file: index.html
+    auth_required: false
+    description: Main single-page application with 4 views (Cursos, Asistencia, Tareas, Notas)
+features:
+  - name: User Login / Welcome
+    description: First-time welcome modal where the user enters their name to personalize the app
+    files:
+      - index.html
+    entry_route: /index.html
+    user_interactions:
+      - See welcome modal on first visit
+      - Fill name input field
+      - Click "Empezar ahora" button to submit
+      - See personalized greeting in header after login
+    api_calls: []
+    auth_required: false
+  - name: Navigation
+    description: Bottom navigation bar to switch between 4 views (Cursos, Asistencia, Tareas, Notas)
+    files:
+      - index.html
+    entry_route: /index.html
+    user_interactions:
+      - Click "Cursos" nav button to view courses
+      - Click "Asistencia" nav button to view attendance
+      - Click "Tareas" nav button to view tasks
+      - Click "Notas" nav button to view grades/performance
+      - See active nav button highlighted in primary color
+    api_calls: []
+    auth_required: false
+  - name: Course Management
+    description: View, create and manage teaching courses with progress tracking
+    files:
+      - index.html
+    entry_route: /index.html
+    user_interactions:
+      - View list of courses with name, schedule, students count and progress
+      - Click "+" button to open Add Course modal
+      - Fill course name input
+      - Fill schedule input
+      - Click "Añadir" button to create new course
+      - Click "Cancelar" to close modal without saving
+      - See toast notification after course creation
+    api_calls: []
+    auth_required: false
+  - name: Attendance Tracking
+    description: Mark student attendance as present or absent for each course
+    files:
+      - index.html
+    entry_route: /index.html
+    user_interactions:
+      - View course filter buttons at top
+      - Click a course filter to switch between courses
+      - See list of students with attendance status
+      - Click green check button to mark student as "presente"
+      - Click red X button to mark student as "ausente"
+      - Click "Finalizar Registro" button to confirm attendance
+      - Click download button to export attendance as CSV
+    api_calls: []
+    auth_required: false
+  - name: Task Management
+    description: Create and manage homework/assignment tasks with completion tracking
+    files:
+      - index.html
+    entry_route: /index.html
+    user_interactions:
+      - View list of pending and completed tasks
+      - Click "+ Nueva" button to open Add Task modal
+      - Fill task title input
+      - Fill due date input
+      - Click "Crear" button to create task
+      - Click "Marcar Finalizada" to complete a task
+      - Click "Reabrir" to reopen a completed task
+      - Click dashed "Nueva Tarea" button at bottom
+    api_calls: []
+    auth_required: false
+  - name: Grades / Performance View
+    description: View academic performance statistics and course averages
+    files:
+      - index.html
+    entry_route: /index.html
+    user_interactions:
+      - View total students count
+      - View completed/total tasks ratio
+      - View average grades per course
+      - Click "Exportar Excel" button to download grades CSV
+    api_calls: []
+    auth_required: false
+  - name: Dark Mode Toggle
+    description: Toggle between light and dark mode themes
+    files:
+      - index.html
+    entry_route: /index.html
+    user_interactions:
+      - Click moon/sun icon button in header
+      - See theme change to dark or light mode
+    api_calls: []
+    auth_required: false
+  - name: Data Backup and Restore
+    description: Export app data as JSON backup and import/restore from JSON file
+    files:
+      - index.html
+    entry_route: /index.html
+    user_interactions:
+      - Click settings gear icon in header
+      - Click "Copia de Seguridad" to download JSON backup
+      - Click "Restaurar Copia" to upload and restore from JSON
+      - See toast notification after backup
+    api_calls: []
+    auth_required: false
+known_limitations:
+  - issue: All data is stored in localStorage only, no backend API
+    location: index.html
+    impact: Data is limited to the browser and can be lost if localStorage is cleared
+  - issue: Grade averages are hardcoded to 8.5 for all courses
+    location: index.html
+    impact: The grades view does not reflect real student performance data
+  - issue: Attendance dates are all stored as "today" without actual date tracking
+    location: index.html
+    impact: Historical attendance cannot be reviewed per specific date

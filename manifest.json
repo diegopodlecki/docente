@@ -1,6 +1,8 @@
 {
     "name": "Agenda Docente - Gestión Escolar",
     "short_name": "Agenda Docente",
+    "lang": "es",
+    "dir": "ltr",
     "description": "Herramienta integral para docentes: Gestión de cursos, asistencia y tareas.",
     "start_url": "./index.html",
     "display": "standalone",

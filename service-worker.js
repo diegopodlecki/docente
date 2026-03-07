@@ -1,4 +1,4 @@
-const CACHE_NAME = 'agenda-docente-v1';
+const CACHE_NAME = 'agenda-docente-v6';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
@@ -7,6 +7,8 @@ const ASSETS_TO_CACHE = [
     './js/ui.js',
     './js/app.js',
     './manifest.json',
+    './assets/icon-192.png',
+    './assets/icon-512.png',
     'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap',
     'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200'
 ];
@@ -33,11 +35,22 @@ self.addEventListener('activate', (event) => {
     );
 });
 
+// Network-first strategy: always try to get the latest version from the server.
+// Only use the cache as a fallback when offline.
 self.addEventListener('fetch', (event) => {
     event.respondWith(
-        caches.match(event.request)
+        fetch(event.request)
             .then((response) => {
-                return response || fetch(event.request);
+                // Clone the response and update the cache with the fresh version
+                const responseClone = response.clone();
+                caches.open(CACHE_NAME).then((cache) => {
+                    cache.put(event.request, responseClone);
+                });
+                return response;
+            })
+            .catch(() => {
+                // Network failed, fall back to cache (offline mode)
+                return caches.match(event.request);
             })
     );
 });

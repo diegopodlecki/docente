@@ -65,9 +65,9 @@ function renderDashboard() {
     coursesCount.textContent = db.courses.length;
     recordsCount.textContent = (db.classRecords || []).length;
 
-    // Latest 3 records
+    // Latest 3 records (Sorted by date DESC, then ID DESC as tie-breaker)
     const recent = [...(db.classRecords || [])]
-        .sort((a, b) => new Date(b.date) - new Date(a.date))
+        .sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id)
         .slice(0, 3);
 
     if (recent.length === 0) {
@@ -123,4 +123,76 @@ function renderWeeklyAgenda() {
             </div>
         `;
     }).join('') || `<p class="text-center text-slate-400 py-6">Asigna días a tus cursos para ver la agenda.</p>`;
+}
+
+function renderClassRecords(filter = '') {
+    const list = document.getElementById('registro-list');
+    if (!db.classRecords || db.classRecords.length === 0) {
+        list.innerHTML = `<p class="text-center text-slate-400 py-6">No hay clases registradas aún.</p>`;
+        return;
+    }
+
+    const query = filter.toLowerCase().trim();
+    // Use a copy to avoid in-place sorting side effects. Sort by date DESC, then ID DESC.
+    let records = [...db.classRecords].sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id);
+
+    if (query) {
+        records = records.filter(r => {
+            const course = db.courses.find(c => c.id === r.courseId);
+            const courseName = course ? course.name.toLowerCase() : 'curso eliminado';
+            const topic = (r.topic || '').toLowerCase();
+            const notes = (r.notes || '').toLowerCase();
+            const homework = (r.homework || '').toLowerCase();
+
+            return courseName.includes(query) ||
+                topic.includes(query) ||
+                notes.includes(query) ||
+                homework.includes(query);
+        });
+    }
+
+    if (records.length === 0) {
+        list.innerHTML = `
+            <div class="py-12 text-center">
+                <span class="material-symbols-outlined text-4xl text-slate-200 mb-2">search_off</span>
+                <p class="text-slate-400 italic">No se encontraron registros para "${filter}"</p>
+            </div>
+        `;
+        return;
+    }
+
+    list.innerHTML = records.map(r => {
+        const course = db.courses.find(c => c.id === r.courseId);
+        return `
+            <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm relative group overflow-hidden">
+                <div class="flex items-start gap-4">
+                    <div class="flex-shrink-0 w-12 text-center">
+                        <p class="text-[10px] font-black uppercase text-slate-400 leading-tight">${r.date.split('-')[1] || ''}</p>
+                        <p class="text-xl font-black text-primary leading-tight">${r.date.split('-')[2] || ''}</p>
+                    </div>
+                    
+                    <div class="flex-1 min-w-0">
+                        <div class="flex justify-between items-start mb-1">
+                            <h3 class="font-bold text-slate-900 dark:text-white truncate pr-10">${course ? course.name : 'Curso eliminado'}</h3>
+                            <button onclick="deleteClassRecord(${r.id})" class="absolute right-2 top-2 size-10 flex items-center justify-center text-rose-500 bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-500/20 rounded-xl transition-all active:scale-90" title="Eliminar registro">
+                                <span class="material-symbols-outlined text-lg">delete</span>
+                            </button>
+                        </div>
+                        <p class="text-xs font-bold text-primary mb-1">${r.topic}</p>
+                        
+                        <div class="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-slate-50 dark:border-slate-700/50">
+                            <div>
+                                <p class="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-0.5">Notas</p>
+                                <p class="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1">${r.notes || '-'}</p>
+                            </div>
+                            <div>
+                                <p class="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-0.5">Tarea</p>
+                                <p class="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1 font-medium">${r.homework || '-'}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
 }

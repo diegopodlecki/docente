@@ -46,6 +46,18 @@ function navigate(viewId) {
     if (viewId === 'agenda') renderWeeklyAgenda();
 }
 
+function navigateAndFocusSearch() {
+    navigate('registro');
+    // Pequeño timeout para permitir que la vista se haga visible (display: block)
+    // antes de intentar poner el foco, garantizando que el teclado se abra en móviles.
+    setTimeout(() => {
+        const searchInput = document.getElementById('registro-search');
+        if (searchInput) {
+            searchInput.focus();
+        }
+    }, 50);
+}
+
 // --- MODULE: COURSES ---
 function renderCourses() {
     const list = document.getElementById('courses-list');
@@ -497,73 +509,23 @@ function exportGradesCSV() {
 }
 
 // --- MODULE: CLASS REGISTRY ---
-function handleRegistroSearch(query) {
-    renderClassRecords(query);
-}
-
-function renderClassRecords(filter = '') {
-    const list = document.getElementById('registro-list');
-    if (!db.classRecords || db.classRecords.length === 0) {
-        list.innerHTML = `<p class="text-center text-slate-400 py-6">No hay clases registradas aún.</p>`;
-        return;
-    }
-
-    const query = filter.toLowerCase().trim();
-    let records = db.classRecords.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-    // Filtrar si hay búsqueda
-    if (query) {
-        records = records.filter(r => {
-            const course = db.courses.find(c => c.id === r.courseId);
-            const courseName = course ? course.name.toLowerCase() : 'curso eliminado';
-            return courseName.includes(query) ||
-                r.topic.toLowerCase().includes(query) ||
-                (r.notes || '').toLowerCase().includes(query) ||
-                (r.homework || '').toLowerCase().includes(query);
-        });
-    }
-
-    if (records.length === 0) {
-        list.innerHTML = `<p class="text-center text-slate-400 py-12 italic">No se encontraron resultados para "${filter}"</p>`;
-        return;
-    }
-
-    list.innerHTML = records.map(r => {
-        const course = db.courses.find(c => c.id === r.courseId);
-        return `
-            <div class="bg-white dark:bg-slate-800 p-5 rounded-[24px] border border-slate-100 dark:border-slate-700 shadow-sm relative group">
-                <div class="flex justify-between items-start mb-2">
-                    <span class="text-[10px] font-bold uppercase tracking-widest text-primary bg-primary/10 px-2 py-1 rounded-md">
-                        ${r.date}
-                    </span>
-                    <button onclick="deleteClassRecord(${r.id})" class="text-slate-300 hover:text-rose-500 transition-colors">
-                        <span class="material-symbols-outlined text-sm">delete</span>
-                    </button>
-                </div>
-                <h3 class="font-bold text-lg text-slate-900 dark:text-white">${course ? course.name : 'Curso eliminado'}</h3>
-                <p class="text-sm font-medium text-slate-600 dark:text-slate-400 mb-3">${r.topic}</p>
-                
-                <div class="space-y-2 border-t border-slate-50 dark:border-slate-700 pt-3">
-                    <div>
-                        <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Notas</p>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">${r.notes || 'Sin notas'}</p>
-                    </div>
-                    <div>
-                        <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Tarea</p>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">${r.homework || 'Sin tarea'}</p>
-                    </div>
-                </div>
-            </div>
-                    `;
-    }).join('');
-}
-
 function populateCourseSelect() {
     const select = document.getElementById('registro-course');
-    const currentValue = select.value;
-    select.innerHTML = '<option value="" disabled selected>Seleccionar Curso</option>' +
-        db.courses.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-    if (currentValue) select.value = currentValue;
+    if (db.courses.length === 0) {
+        select.innerHTML = '<option value="" disabled selected>Primero debes crear un curso</option>';
+        select.disabled = true;
+    } else {
+        const currentValue = select.value;
+        select.innerHTML = '<option value="" disabled selected>Seleccionar Curso</option>' +
+            db.courses.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        if (currentValue) select.value = currentValue;
+        select.disabled = false;
+    }
+}
+
+function openNewClassModal() {
+    populateCourseSelect();
+    openModal('registro-modal');
 }
 
 function handleNewClassRecord(e) {

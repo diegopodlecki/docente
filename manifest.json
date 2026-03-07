@@ -1,21 +1,23 @@
 {
-    "name": "Docente Pro - Gestión Escolar",
-    "short_name": "Docente Pro",
+    "name": "Agenda Docente - Gestión Escolar",
+    "short_name": "Agenda Docente",
     "description": "Herramienta integral para docentes: Gestión de cursos, asistencia y tareas.",
-    "start_url": "/index.html",
+    "start_url": "./index.html",
     "display": "standalone",
-    "background_color": "#101622",
+    "background_color": "#ffffff",
     "theme_color": "#2b6cee",
     "icons": [
         {
             "src": "assets/icon-192.png",
             "sizes": "192x192",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any maskable"
         },
         {
             "src": "assets/icon-512.png",
             "sizes": "512x512",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any maskable"
         }
     ]
 }

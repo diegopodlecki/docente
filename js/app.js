@@ -6,7 +6,7 @@ function navigate(viewId) {
     document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
     document.getElementById('view-' + viewId).classList.add('active');
 
-    const titles = { 'cursos': 'Mis Cursos', 'asistencia': 'Asistencia', 'tareas': 'Tareas', 'notas': 'Rendimiento', 'registro': 'Registro de Clase' };
+    const titles = { 'cursos': 'Mis Cursos', 'asistencia': 'Asistencia', 'tareas': 'Tareas', 'notas': 'Rendimiento', 'registro': 'Registro', 'agenda': 'Agenda Semanal' };
     document.getElementById('header-title').textContent = titles[viewId];
 
     document.querySelectorAll('.nav-btn').forEach(btn => {
@@ -24,14 +24,26 @@ function navigate(viewId) {
         activeBtn.querySelector('p').classList.replace('font-medium', 'font-bold');
     }
 
+    // Dashboard Visibility
+    const dash = document.getElementById('dashboard-container');
+    if (viewId === 'cursos') {
+        dash.classList.remove('hidden');
+        renderDashboard();
+    } else {
+        dash.classList.add('hidden');
+    }
+
     if (viewId === 'cursos') renderCourses();
     if (viewId === 'asistencia') renderAttendance();
     if (viewId === 'tareas') renderTasks();
     if (viewId === 'notas') renderNotas();
     if (viewId === 'registro') {
+        const searchInput = document.getElementById('registro-search');
+        if (searchInput) searchInput.value = '';
         renderClassRecords();
         populateCourseSelect();
     }
+    if (viewId === 'agenda') renderWeeklyAgenda();
 }
 
 // --- MODULE: COURSES ---
@@ -77,10 +89,12 @@ function renderCourses() {
 function handleNewCourse(e) {
     e.preventDefault();
     const name = document.getElementById('course-name').value;
+    const day = document.getElementById('course-day').value;
     const schedule = document.getElementById('course-schedule').value;
     const newCourse = {
         id: Date.now(),
         name,
+        day,
         schedule,
         progress: 0,
         color: '#2b6cee',
@@ -129,6 +143,7 @@ function openEditCourse(id) {
     if (!course) return;
     document.getElementById('edit-course-id').value = course.id;
     document.getElementById('edit-course-name').value = course.name;
+    document.getElementById('edit-course-day').value = course.day || 'Lunes';
     document.getElementById('edit-course-schedule').value = course.schedule;
     openModal('edit-course-modal');
 }
@@ -137,11 +152,13 @@ function handleEditCourse(e) {
     e.preventDefault();
     const id = Number(document.getElementById('edit-course-id').value);
     const name = document.getElementById('edit-course-name').value;
+    const day = document.getElementById('edit-course-day').value;
     const schedule = document.getElementById('edit-course-schedule').value;
 
     const course = db.courses.find(c => c.id === id);
     if (course) {
         course.name = name;
+        course.day = day;
         course.schedule = schedule;
         save();
         renderCourses();
@@ -480,14 +497,38 @@ function exportGradesCSV() {
 }
 
 // --- MODULE: CLASS REGISTRY ---
-function renderClassRecords() {
+function handleRegistroSearch(query) {
+    renderClassRecords(query);
+}
+
+function renderClassRecords(filter = '') {
     const list = document.getElementById('registro-list');
     if (!db.classRecords || db.classRecords.length === 0) {
         list.innerHTML = `<p class="text-center text-slate-400 py-6">No hay clases registradas aún.</p>`;
         return;
     }
 
-    list.innerHTML = db.classRecords.sort((a, b) => new Date(b.date) - new Date(a.date)).map(r => {
+    const query = filter.toLowerCase().trim();
+    let records = db.classRecords.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    // Filtrar si hay búsqueda
+    if (query) {
+        records = records.filter(r => {
+            const course = db.courses.find(c => c.id === r.courseId);
+            const courseName = course ? course.name.toLowerCase() : 'curso eliminado';
+            return courseName.includes(query) ||
+                r.topic.toLowerCase().includes(query) ||
+                (r.notes || '').toLowerCase().includes(query) ||
+                (r.homework || '').toLowerCase().includes(query);
+        });
+    }
+
+    if (records.length === 0) {
+        list.innerHTML = `<p class="text-center text-slate-400 py-12 italic">No se encontraron resultados para "${filter}"</p>`;
+        return;
+    }
+
+    list.innerHTML = records.map(r => {
         const course = db.courses.find(c => c.id === r.courseId);
         return `
             <div class="bg-white dark:bg-slate-800 p-5 rounded-[24px] border border-slate-100 dark:border-slate-700 shadow-sm relative group">

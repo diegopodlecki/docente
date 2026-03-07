@@ -80,6 +80,57 @@
 
         <main class="flex-1 pb-24" id="main-content">
 
+            <!-- DASHBOARD BOX -->
+            <div id="dashboard-container" class="px-4 pt-6 hidden">
+                <div class="grid grid-cols-2 gap-3 mb-6">
+                    <div class="bg-primary/5 dark:bg-primary/10 p-4 rounded-3xl border border-primary/10">
+                        <p class="text-[10px] font-bold text-primary uppercase tracking-wider mb-1">Cursos</p>
+                        <p id="dash-courses-count" class="text-2xl font-black text-primary">0</p>
+                    </div>
+                    <div class="bg-emerald-500/5 dark:bg-emerald-500/10 p-4 rounded-3xl border border-emerald-500/10">
+                        <p class="text-[10px] font-bold text-emerald-600 uppercase tracking-wider mb-1">Registros</p>
+                        <p id="dash-records-count" class="text-2xl font-black text-emerald-600">0</p>
+                    </div>
+                </div>
+
+                <!-- ACCIONES RÁPIDAS -->
+                <div class="mb-8">
+                    <h3 class="text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">Acciones Rápidas</h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="openModal('registro-modal')"
+                            class="flex flex-col items-center justify-center p-4 bg-primary text-white rounded-[24px] shadow-lg shadow-primary/30 active:scale-95 transition-transform">
+                            <span class="material-symbols-outlined text-[32px] mb-2">history_edu</span>
+                            <span class="text-xs font-bold uppercase tracking-wider">Nueva Clase</span>
+                        </button>
+                        <button onclick="openModal('course-modal')"
+                            class="flex flex-col items-center justify-center p-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-[24px] active:scale-95 transition-transform">
+                            <span class="material-symbols-outlined text-[32px] mb-2">library_add</span>
+                            <span class="text-xs font-bold uppercase tracking-wider">Nuevo Curso</span>
+                        </button>
+                        <button onclick="navigate('agenda')"
+                            class="flex flex-col items-center justify-center p-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-[24px] active:scale-95 transition-transform">
+                            <span class="material-symbols-outlined text-[32px] mb-2">calendar_view_week</span>
+                            <span class="text-xs font-bold uppercase tracking-wider">Ver Agenda</span>
+                        </button>
+                        <button onclick="navigate('registro')"
+                            class="flex flex-col items-center justify-center p-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-[24px] active:scale-95 transition-transform">
+                            <span class="material-symbols-outlined text-[32px] mb-2">view_list</span>
+                            <span class="text-xs font-bold uppercase tracking-wider">Registros</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mb-2 flex items-center justify-between">
+                    <h3 class="text-sm font-bold uppercase tracking-widest text-slate-400">Últimas Clases</h3>
+                    <button onclick="navigate('registro')"
+                        class="text-[10px] font-bold text-primary uppercase hover:underline">Ver todas</button>
+                </div>
+                <div id="dash-recent-list" class="space-y-3 mb-8">
+                    <!-- Dynamic recent records -->
+                </div>
+                <div class="h-px bg-slate-100 dark:bg-slate-800 w-full mb-6"></div>
+            </div>
+
             <!-- VIEW: CURSOS -->
             <section id="view-cursos" class="view-section active">
                 <div class="px-4 pt-6">
@@ -165,8 +216,27 @@
                             <span class="material-symbols-outlined">add</span>
                         </button>
                     </div>
+
+                    <!-- BUSCADOR -->
+                    <div class="relative">
+                        <span
+                            class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+                        <input type="text" id="registro-search" oninput="handleRegistroSearch(this.value)"
+                            placeholder="Buscar por curso, tema o notas..."
+                            class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-2xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-primary text-sm transition-all h-14">
+                    </div>
                     <div id="registro-list" class="space-y-4">
                         <!-- Rendered dynamically -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: AGENDA SEMANAL -->
+            <section id="view-agenda" class="view-section">
+                <div class="px-4 pt-6 space-y-6">
+                    <h2 class="text-2xl font-bold">Agenda Semanal</h2>
+                    <div id="weekly-agenda-list" class="space-y-8">
+                        <!-- Grouped by day -->
                     </div>
                 </div>
             </section>
@@ -206,6 +276,12 @@
                 <span class="material-symbols-outlined text-[28px]">history_edu</span>
                 <p class="text-[10px] font-medium mt-1">Registro</p>
             </button>
+            <button onclick="navigate('agenda')"
+                class="nav-btn transition-transform active:scale-95 text-slate-400 dark:text-slate-500"
+                data-view="agenda">
+                <span class="material-symbols-outlined text-[28px]">calendar_view_week</span>
+                <p class="text-[10px] font-medium mt-1">Agenda</p>
+            </button>
         </nav>
 
         <!-- MODAL: ADD COURSE -->
@@ -218,7 +294,16 @@
                 <form onsubmit="handleNewCourse(event)" class="space-y-4">
                     <input type="text" id="course-name" placeholder="Nombre del Curso (ej: Física I)" required
                         class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary h-14">
-                    <input type="text" id="course-schedule" placeholder="Horario (ej: LUN 08:00)" required
+                    <select id="course-day" required
+                        class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary h-14">
+                        <option value="" disabled selected>Seleccionar Día</option>
+                        <option value="Lunes">Lunes</option>
+                        <option value="Martes">Martes</option>
+                        <option value="Miércoles">Miércoles</option>
+                        <option value="Jueves">Jueves</option>
+                        <option value="Viernes">Viernes</option>
+                    </select>
+                    <input type="text" id="course-schedule" placeholder="Horario (ej: 08:00)" required
                         class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary h-14">
                     <div class="flex gap-3">
                         <button type="button" onclick="closeModal('course-modal')"
@@ -242,6 +327,14 @@
                     <input type="hidden" id="edit-course-id">
                     <input type="text" id="edit-course-name" placeholder="Nombre del Curso" required
                         class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary h-14">
+                    <select id="edit-course-day" required
+                        class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary h-14">
+                        <option value="Lunes">Lunes</option>
+                        <option value="Martes">Martes</option>
+                        <option value="Miércoles">Miércoles</option>
+                        <option value="Jueves">Jueves</option>
+                        <option value="Viernes">Viernes</option>
+                    </select>
                     <input type="text" id="edit-course-schedule" placeholder="Horario" required
                         class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary h-14">
                     <div class="flex gap-3">

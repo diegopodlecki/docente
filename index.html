@@ -83,6 +83,12 @@
 
         <main class="flex-1 pb-24" id="main-content">
 
+            <div class="px-4 py-4">
+                <button onclick="loginGoogle()" class="w-full bg-primary text-white py-3 rounded-2xl font-bold shadow-lg">
+                    Conectar con Google Classroom
+                </button>
+            </div>
+
             <!-- DASHBOARD BOX -->
             <div id="dashboard-container" class="px-4 pt-6 hidden">
                 <div class="grid grid-cols-2 gap-3 mb-6">
@@ -383,6 +389,12 @@
             </section>
 
         </main>
+
+<script>
+function loginGoogle(){
+    window.location.href = "http://localhost:3000/auth/google";
+}
+</script>
 
         <!-- Navigation Bar -->
         <nav

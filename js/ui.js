@@ -32,41 +32,44 @@ function showToast(msg) {
     toastTimeout = setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-function toggleDarkMode() {
+async function toggleDarkMode() {
     document.documentElement.classList.toggle('dark');
-    db.settings.darkMode = document.documentElement.classList.contains('dark');
-    save();
+    const isDark = document.documentElement.classList.contains('dark');
+    await dataService.updateSettings({ darkMode: isDark });
 }
 
-function handleLogin(e) {
+async function handleLogin(e) {
     e.preventDefault();
     const name = document.getElementById('user-name-input').value;
-    db.userName = name;
-    save();
+    await dataService.setUserName(name);
     document.getElementById('welcome-modal').classList.add('hidden');
-    updateGreeting();
+    await updateGreeting();
     showToast(`¡Un gusto verte, ${name}!`);
 }
 
-function updateGreeting() {
+async function updateGreeting() {
     const greeting = document.getElementById('user-greeting');
-    if (db.userName) {
-        greeting.textContent = `¡Hola, ${db.userName}! 👋`;
+    const userName = await dataService.getUserName();
+    if (userName) {
+        greeting.textContent = `¡Hola, ${userName}! 👋`;
     }
 }
 
-function renderDashboard() {
+async function renderDashboard() {
     const container = document.getElementById('dashboard-container');
     const coursesCount = document.getElementById('dash-courses-count');
     const recordsCount = document.getElementById('dash-records-count');
     const recentList = document.getElementById('dash-recent-list');
 
+    const courses = await dataService.getCourses();
+    const classRecords = await dataService.getClassRecords();
+
     // Update counts
-    coursesCount.textContent = db.courses.length;
-    recordsCount.textContent = (db.classRecords || []).length;
+    coursesCount.textContent = courses.length;
+    recordsCount.textContent = classRecords.length;
 
     // Latest 3 records (Sorted by date DESC, then ID DESC as tie-breaker)
-    const recent = [...(db.classRecords || [])]
+    const recent = [...classRecords]
         .sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id)
         .slice(0, 3);
 
@@ -74,7 +77,7 @@ function renderDashboard() {
         recentList.innerHTML = `<p class="text-center text-xs text-slate-400 py-4 italic">No hay registros recientes</p>`;
     } else {
         recentList.innerHTML = recent.map(r => {
-            const course = db.courses.find(c => c.id === r.courseId);
+            const course = courses.find(c => c.id === r.courseId);
             return `
                 <div class="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800">
                     <div class="size-10 rounded-xl bg-white dark:bg-slate-900 flex items-center justify-center text-primary border border-slate-100 dark:border-slate-800">
@@ -94,17 +97,19 @@ function renderDashboard() {
     }
 }
 
-function renderWeeklyAgenda() {
+async function renderWeeklyAgenda() {
     const list = document.getElementById('weekly-agenda-list');
     const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
 
-    if (db.courses.length === 0) {
+    const courses = await dataService.getCourses();
+
+    if (courses.length === 0) {
         list.innerHTML = `<p class="text-center text-slate-400 py-6">No hay cursos configurados.</p>`;
         return;
     }
 
     list.innerHTML = days.map(day => {
-        const dayCourses = db.courses.filter(c => (c.day || 'Lunes') === day);
+        const dayCourses = courses.filter(c => (c.day || 'Lunes') === day);
         if (dayCourses.length === 0) return '';
 
         return `
@@ -129,16 +134,19 @@ function renderWeeklyAgenda() {
     }).join('') || `<p class="text-center text-slate-400 py-6">Asigna días a tus cursos para ver la agenda.</p>`;
 }
 
-function renderClassRecords(filter = '') {
+async function renderClassRecords(filter = '') {
     const list = document.getElementById('registro-list');
-    if (!db.classRecords || db.classRecords.length === 0) {
+    const classRecords = await dataService.getClassRecords();
+    const courses = await dataService.getCourses();
+
+    if (!classRecords || classRecords.length === 0) {
         list.innerHTML = `<p class="text-center text-slate-400 py-6">No hay clases registradas aún.</p>`;
         return;
     }
 
     const query = filter.toLowerCase().trim();
     // Use a copy to avoid in-place sorting side effects. Sort by date DESC, then ID DESC.
-    let records = [...db.classRecords].sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id);
+    let records = [...classRecords].sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id);
 
     // Actualizar el contador total/filtrado
     const updateCounter = (count) => {
@@ -148,7 +156,7 @@ function renderClassRecords(filter = '') {
 
     if (query) {
         records = records.filter(r => {
-            const course = db.courses.find(c => c.id === r.courseId);
+            const course = courses.find(c => c.id === r.courseId);
             const courseName = course ? course.name.toLowerCase() : 'curso eliminado';
             const topic = (r.topic || '').toLowerCase();
             const notes = (r.notes || '').toLowerCase();
@@ -176,7 +184,7 @@ function renderClassRecords(filter = '') {
     }
 
     list.innerHTML = records.map(r => {
-        const course = db.courses.find(c => c.id === r.courseId);
+        const course = courses.find(c => c.id === r.courseId);
         return `
             <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm relative group overflow-hidden">
                 <div class="flex items-start gap-4">

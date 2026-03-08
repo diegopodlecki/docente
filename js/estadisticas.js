@@ -1,11 +1,15 @@
 // --- ESTADISTICAS MODULE ---
 // Logic for calculating and displaying dashboard statistics
 
-function renderStatistics() {
+async function renderStatistics() {
     const statsGrid = document.getElementById('dash-stats-grid');
     if (!statsGrid) return;
 
-    const records = db.classRecords || [];
+    const [records, courses] = await Promise.all([
+        dataService.getClassRecords(),
+        dataService.getCourses()
+    ]);
+
     if (records.length === 0) {
         statsGrid.innerHTML = '<p class="text-xs text-slate-400 col-span-2 text-center py-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl">Aún no hay suficientes datos para mostrar estadísticas.</p>';
         return;
@@ -17,14 +21,16 @@ function renderStatistics() {
     // 2. Curso con más clases
     const courseCounts = {};
     records.forEach(r => {
-        courseCounts[r.course] = (courseCounts[r.course] || 0) + 1;
+        const course = courses.find(c => c.id === r.courseId);
+        const name = course ? course.name : 'Curso eliminado';
+        courseCounts[name] = (courseCounts[name] || 0) + 1;
     });
     let topCourse = '';
     let topCourseCount = 0;
-    for (const [course, count] of Object.entries(courseCounts)) {
+    for (const [name, count] of Object.entries(courseCounts)) {
         if (count > topCourseCount) {
             topCourseCount = count;
-            topCourse = course;
+            topCourse = name;
         }
     }
 
@@ -32,8 +38,8 @@ function renderStatistics() {
     const topicCounts = {};
     records.forEach(r => {
         // Normalizar tema (minúsculas, sin espacios extra)
-        const topic = r.topic.trim().toLowerCase();
-        topicCounts[topic] = (topicCounts[topic] || 0) + 1;
+        const topic = (r.topic || '').trim().toLowerCase();
+        if (topic) topicCounts[topic] = (topicCounts[topic] || 0) + 1;
     });
     let topTopic = '';
     let topTopicCount = 0;

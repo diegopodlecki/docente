@@ -1,7 +1,7 @@
 // --- SMART REGISTRY MODULE ---
 // Client-side heuristics to parse free text into structured class records
 
-function generateSmartRecord() {
+async function generateSmartRecord() {
     const textInput = document.getElementById('smart-text');
     const feedback = document.getElementById('smart-feedback');
     if (!textInput || !feedback) return;
@@ -25,9 +25,10 @@ function generateSmartRecord() {
 
     // 2. Parse Course
     let detectedCourseId = '';
-    if (db && db.courses) {
+    const courses = await dataService.getCourses();
+    if (courses && courses.length > 0) {
         // Sort courses by length descending to match longer specific names first
-        const sortedCourses = [...db.courses].sort((a, b) => b.name.length - a.name.length);
+        const sortedCourses = [...courses].sort((a, b) => b.name.length - a.name.length);
         for (const course of sortedCourses) {
             if (lowerText.includes(course.name.toLowerCase())) {
                 detectedCourseId = course.id;
@@ -81,6 +82,7 @@ function generateSmartRecord() {
     // Highlight updated fields
     const fields = [dateField, courseField, topicField, notesField, hwField];
     fields.forEach(f => {
+        if (!f) return;
         // Temporarily add a highlight class
         f.classList.add('ring-2', 'ring-indigo-400', 'bg-indigo-50', 'dark:bg-indigo-900/10');
         setTimeout(() => {

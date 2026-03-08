@@ -1,8 +1,10 @@
 // --- EXPORTAR MODULE ---
 // Logic for exporting class records to CSV/Excel
 
-function exportToCSV() {
-    const records = db.classRecords || [];
+async function exportToCSV() {
+    const records = await dataService.getClassRecords();
+    const courses = await dataService.getCourses();
+
     if (records.length === 0) {
         if (typeof showToast === 'function') showToast('No hay registros para exportar');
         return;
@@ -16,10 +18,10 @@ function exportToCSV() {
     const sortedRecords = [...records].sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id);
 
     sortedRecords.forEach(r => {
-        const course = db.courses.find(c => c.id === r.courseId);
+        const course = courses.find(c => c.id === r.courseId);
         const courseName = course ? course.name.replace(/,/g, '') : 'Curso eliminado'; // Strip commas to avoid CSV issues
         const date = r.date;
-        const topic = r.topic.replace(/,/g, ' '); // Avoid commas in text fields
+        const topic = (r.topic || '').replace(/,/g, ' '); // Avoid commas in text fields
         const notes = (r.notes || '').replace(/,/g, ' ').replace(/\n/g, ' ');
         const homework = (r.homework || '').replace(/,/g, ' ').replace(/\n/g, ' ');
 

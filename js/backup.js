@@ -1,7 +1,8 @@
 // --- BACKUP MODULE ---
 // Logic for exporting and importing the entire local database (db)
 
-function exportBackup() {
+async function exportBackup() {
+    const db = await dataService.getFullDB();
     const dataStr = JSON.stringify(db, null, 2);
     const blob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -23,12 +24,11 @@ function importBackup(event) {
     }
 
     const reader = new FileReader();
-    reader.onload = function (e) {
+    reader.onload = async function (e) {
         try {
             const importedData = JSON.parse(e.target.result);
             if (importedData && importedData.courses) {
-                db = importedData;
-                save(); // Must be defined in storage.js
+                await dataService.importFullDB(importedData);
                 alert('Datos restaurados correctamente. La página se recargará.');
                 window.location.reload();
             } else {

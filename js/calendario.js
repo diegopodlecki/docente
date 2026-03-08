@@ -3,12 +3,12 @@
 
 let currentCalendarDate = new Date();
 
-function changeMonth(delta) {
+async function changeMonth(delta) {
     currentCalendarDate.setMonth(currentCalendarDate.getMonth() + delta);
-    renderCalendar();
+    await renderCalendar();
 }
 
-function renderCalendar() {
+async function renderCalendar() {
     const grid = document.getElementById('calendar-grid');
     const title = document.getElementById('calendar-month-year');
     if (!grid || !title) return;
@@ -31,7 +31,7 @@ function renderCalendar() {
     }
 
     // Days of the month
-    const records = db.classRecords || [];
+    const records = await dataService.getClassRecords();
 
     for (let day = 1; day <= daysInMonth; day++) {
         const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
@@ -57,11 +57,12 @@ function renderCalendar() {
     }
 }
 
-function showCalendarDayDetails(dateStr) {
+async function showCalendarDayDetails(dateStr) {
     const detailsContainer = document.getElementById('calendar-day-details');
     if (!detailsContainer) return;
 
-    const records = db.classRecords || [];
+    const records = await dataService.getClassRecords();
+    const courses = await dataService.getCourses();
     const dayClasses = records.filter(r => r.date === dateStr);
 
     const dateObj = new Date(dateStr + 'T12:00:00'); // Force local noon to avoid timezone shift
@@ -88,7 +89,7 @@ function showCalendarDayDetails(dateStr) {
     `;
 
     dayClasses.forEach(r => {
-        const course = db.courses.find(c => c.id === r.courseId);
+        const course = courses.find(c => c.id === r.courseId);
         html += `
             <div class="bg-white dark:bg-slate-800 p-5 rounded-[24px] shadow-sm border border-slate-100 dark:border-slate-800/50 relative group transition-all animation-fade-in">
                 <div class="flex items-start justify-between mb-3">

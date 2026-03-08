@@ -2,7 +2,7 @@ let courseToDeleteId = null;
 let activeManageCourseId = null;
 
 // --- NAVIGATION ---
-function navigate(viewId) {
+async function navigate(viewId) {
     document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
     document.getElementById('view-' + viewId).classList.add('active');
 
@@ -28,29 +28,29 @@ function navigate(viewId) {
     const dash = document.getElementById('dashboard-container');
     if (viewId === 'cursos') {
         dash.classList.remove('hidden');
-        renderDashboard();
+        await renderDashboard();
     } else {
         dash.classList.add('hidden');
     }
 
-    if (viewId === 'cursos') renderCourses();
-    if (viewId === 'asistencia') renderAttendance();
-    if (viewId === 'tareas') renderTasks();
-    if (viewId === 'notas') renderNotas();
+    if (viewId === 'cursos') await renderCourses();
+    if (viewId === 'asistencia') await renderAttendance();
+    if (viewId === 'tareas') await renderTasks();
+    if (viewId === 'notas') await renderNotas();
     if (viewId === 'registro') {
         const searchInput = document.getElementById('registro-search');
         if (searchInput) searchInput.value = '';
-        renderClassRecords();
-        populateCourseSelect();
+        await renderClassRecords();
+        await populateCourseSelect();
     }
-    if (viewId === 'agenda') renderWeeklyAgenda();
+    if (viewId === 'agenda') await renderWeeklyAgenda();
     if (viewId === 'calendario' && typeof renderCalendar === 'function') {
-        renderCalendar();
+        await renderCalendar();
     }
 }
 
-function navigateAndFocusSearch() {
-    navigate('registro');
+async function navigateAndFocusSearch() {
+    await navigate('registro');
     // Pequeño timeout para permitir que la vista se haga visible (display: block)
     // antes de intentar poner el foco, garantizando que el teclado se abra en móviles.
     setTimeout(() => {
@@ -62,9 +62,10 @@ function navigateAndFocusSearch() {
 }
 
 // --- MODULE: COURSES ---
-function renderCourses() {
+async function renderCourses() {
     const list = document.getElementById('courses-list');
-    list.innerHTML = db.courses.map(c => `
+    const courses = await dataService.getCourses();
+    list.innerHTML = courses.map(c => `
         <article class="bg-white dark:bg-slate-800 rounded-3xl overflow-hidden border border-slate-100 dark:border-slate-800 shadow-sm relative group">
             <div class="h-28 relative" style="background: linear-gradient(135deg, ${c.color} 0%, #6394ff 100%);">
                 <div class="absolute top-4 right-4 bg-white/20 backdrop-blur-md text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">${c.schedule}</div>
@@ -101,7 +102,7 @@ function renderCourses() {
     `).join('');
 }
 
-function handleNewCourse(e) {
+async function handleNewCourse(e) {
     e.preventDefault();
     const name = document.getElementById('course-name').value;
     const day = document.getElementById('course-day').value;
@@ -115,9 +116,8 @@ function handleNewCourse(e) {
         color: '#2b6cee',
         students: [] // Start with no students
     };
-    db.courses.push(newCourse);
-    save();
-    renderCourses();
+    await dataService.addCourse(newCourse);
+    await renderCourses();
     closeModal('course-modal');
     showToast('Curso añadido');
     e.target.reset();
@@ -129,32 +129,19 @@ function deleteCourseRequest(id) {
     openModal('confirm-delete-modal');
 }
 
-function confirmDeleteCourse() {
+async function confirmDeleteCourse() {
     if (!courseToDeleteId) return;
 
-    // Delete course
-    db.courses = db.courses.filter(c => c.id !== courseToDeleteId);
+    await dataService.deleteCourse(courseToDeleteId);
 
-    // Cleanup tasks
-    db.tasks = db.tasks.filter(t => t.courseId !== courseToDeleteId);
-
-    // Cleanup attendance & grades based on course ID in keys
-    Object.keys(db.attendance).forEach(key => {
-        if (key.includes(`_${courseToDeleteId}_`)) delete db.attendance[key];
-    });
-    Object.keys(db.grades || {}).forEach(key => {
-        if (key.startsWith(`${courseToDeleteId}_`)) delete db.grades[key];
-    });
-
-    save();
     closeModal('confirm-delete-modal');
     showToast('Curso y datos asociados eliminados');
-    renderCourses();
+    await renderCourses();
     courseToDeleteId = null;
 }
 
-function openEditCourse(id) {
-    const course = db.courses.find(c => c.id === id);
+async function openEditCourse(id) {
+    const course = await dataService.getCourseById(id);
     if (!course) return;
     document.getElementById('edit-course-id').value = course.id;
     document.getElementById('edit-course-name').value = course.name;
@@ -163,35 +150,30 @@ function openEditCourse(id) {
     openModal('edit-course-modal');
 }
 
-function handleEditCourse(e) {
+async function handleEditCourse(e) {
     e.preventDefault();
     const id = Number(document.getElementById('edit-course-id').value);
     const name = document.getElementById('edit-course-name').value;
     const day = document.getElementById('edit-course-day').value;
     const schedule = document.getElementById('edit-course-schedule').value;
 
-    const course = db.courses.find(c => c.id === id);
-    if (course) {
-        course.name = name;
-        course.day = day;
-        course.schedule = schedule;
-        save();
-        renderCourses();
-        closeModal('edit-course-modal');
-        showToast('Curso editado');
-    }
+    await dataService.updateCourse(id, { name, day, schedule });
+    await renderCourses();
+    closeModal('edit-course-modal');
+    showToast('Curso editado');
 }
 
-function openManageStudents(id) {
+async function openManageStudents(id) {
     activeManageCourseId = id;
-    const course = db.courses.find(c => c.id === id);
+    const course = await dataService.getCourseById(id);
     document.getElementById('manage-students-title').textContent = `Alumnos: ${course.name}`;
-    renderManageStudents();
+    await renderManageStudents();
     openModal('manage-students-modal');
 }
 
-function renderManageStudents() {
-    const course = db.courses.find(c => c.id === activeManageCourseId);
+async function renderManageStudents() {
+    const course = await dataService.getCourseById(activeManageCourseId);
+    if (!course) return;
     const list = document.getElementById('manage-students-list');
     if (!course.students || course.students.length === 0) {
         list.innerHTML = `<p class="text-center text-slate-400 text-sm py-4">No hay alumnos en este curso.</p>`;
@@ -211,72 +193,69 @@ function renderManageStudents() {
     `).join('');
 }
 
-function handleAddStudent(e) {
+async function handleAddStudent(e) {
     e.preventDefault();
     const input = document.getElementById('new-student-name');
     const name = input.value.trim();
     if (!name || !activeManageCourseId) return;
 
-    const course = db.courses.find(c => c.id === activeManageCourseId);
-    if (!course.students) course.students = [];
-    course.students.push({ id: Date.now() + Math.random(), name });
+    const newStudent = { id: Date.now() + Math.random(), name };
+    await dataService.addStudentToCourse(activeManageCourseId, newStudent);
 
-    save();
-    renderManageStudents();
-    renderCourses(); // Updates student count on card
+    await renderManageStudents();
+    await renderCourses(); // Updates student count on card
     input.value = '';
     showToast('Alumno añadido');
 }
 
-function removeStudent(studentId) {
-    const course = db.courses.find(c => c.id === activeManageCourseId);
-    if (!course) return;
+async function removeStudent(studentId) {
+    if (!activeManageCourseId) return;
 
     const confirmRemove = confirm("¿Eliminar este alumno del curso?");
     if (!confirmRemove) return;
 
-    course.students = course.students.filter(s => s.id !== studentId);
+    await dataService.removeStudentFromCourse(activeManageCourseId, studentId);
+    await dataService.deleteAttendanceByStudent(studentId);
 
-    // Clean up attendance strings specifically for this student
-    Object.keys(db.attendance).forEach(key => {
-        if (key.includes(`_${studentId}`)) delete db.attendance[key];
-    });
-
-    save();
-    renderManageStudents();
-    renderCourses(); // Updates student count on card
+    await renderManageStudents();
+    await renderCourses(); // Updates student count on card
     showToast('Alumno eliminado');
 }
 
 // --- MODULE: ATTENDANCE ---
-function renderAttendance() {
+async function renderAttendance() {
     const filters = document.getElementById('attendance-course-filters');
-    if (db.courses.length === 0) {
+    const courses = await dataService.getCourses();
+
+    if (courses.length === 0) {
         filters.innerHTML = '';
         document.getElementById('attendance-list').innerHTML = `<p class="text-center text-slate-400 py-6">No tienes cursos activos.</p>`;
         return;
     }
 
-    filters.innerHTML = db.courses.map((c, i) => `
+    filters.innerHTML = courses.map((c, i) => `
         <button onclick="renderAttendanceList(${c.id})" class="px-4 py-2 whitespace-nowrap rounded-xl text-sm font-bold transition-all ${i === 0 ? 'bg-primary text-white shadow-md' : 'bg-slate-100 dark:bg-slate-800'}">${c.name}</button>
     `).join('');
 
     // Auto-select first course when entering view
-    renderAttendanceList(db.courses[0].id);
+    await renderAttendanceList(courses[0].id);
 }
 
-function renderAttendanceList(courseId) {
+async function renderAttendanceList(courseId) {
+    const courses = await dataService.getCourses();
+    const attendance = await dataService.getAttendance();
+
     // Update active visual state for buttons
     const filters = document.getElementById('attendance-course-filters');
     Array.from(filters.children).forEach(btn => {
-        if (btn.textContent === db.courses.find(c => c.id === courseId)?.name) {
+        if (btn.textContent === courses.find(c => c.id === courseId)?.name) {
             btn.className = "px-4 py-2 whitespace-nowrap rounded-xl text-sm font-bold transition-all bg-primary text-white shadow-md";
         } else {
             btn.className = "px-4 py-2 whitespace-nowrap rounded-xl text-sm font-bold transition-all bg-slate-100 dark:bg-slate-800";
         }
     });
 
-    const course = db.courses.find(c => c.id === courseId);
+    const course = courses.find(c => c.id === courseId);
     const list = document.getElementById('attendance-list');
 
     if (!course || !course.students || course.students.length === 0) {
@@ -285,7 +264,7 @@ function renderAttendanceList(courseId) {
     }
 
     list.innerHTML = course.students.map((s) => {
-        const status = db.attendance[`today_${courseId}_${s.id}`] || 'unchecked';
+        const status = attendance[`today_${courseId}_${s.id}`] || 'unchecked';
         return `
             <div class="flex items-center gap-4 p-4 active:bg-slate-50 dark:active:bg-slate-800 transition-colors">
                 <div class="size-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-slate-400">${s.name.charAt(0)}</div>
@@ -306,16 +285,18 @@ function renderAttendanceList(courseId) {
     }).join('');
 }
 
-function markAttendance(courseId, studentId, status) {
-    db.attendance[`today_${courseId}_${studentId}`] = status;
-    save();
-    renderAttendanceList(courseId);
+async function markAttendance(courseId, studentId, status) {
+    await dataService.setAttendance(`today_${courseId}_${studentId}`, status);
+    await renderAttendanceList(courseId);
 }
 
 // --- MODULE: TASKS ---
-function renderTasks() {
+async function renderTasks() {
     const list = document.getElementById('tasks-list');
-    list.innerHTML = db.tasks.map(t => `
+    const tasks = await dataService.getTasks();
+    const courses = await dataService.getCourses();
+
+    list.innerHTML = tasks.map(t => `
         <div class="bg-white dark:bg-slate-800 border-2 ${t.status === 'completed' ? 'border-emerald-500/30' : 'border-primary shadow-lg shadow-primary/5'} p-5 rounded-[24px] transition-all">
             <div class="flex justify-between items-start mb-3">
                 <span class="text-[10px] font-bold uppercase tracking-widest ${t.status === 'completed' ? 'text-emerald-500 bg-emerald-500/10' : 'text-primary bg-primary/10'} px-2 py-1 rounded-md">
@@ -340,39 +321,57 @@ function renderTasks() {
     `;
 }
 
-function toggleTaskStatus(taskId) {
-    const task = db.tasks.find(t => t.id === taskId);
+async function toggleTaskStatus(taskId) {
+    const tasks = await dataService.getTasks();
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
     task.status = task.status === 'completed' ? 'pending' : 'completed';
-    save();
-    renderTasks();
+    // We don't have updateTask in dataService yet, let's use a generic save or add it
+    // For now, let's use the internal db since it's shared, but correctly we should add updateTask
+    await dataService._save();
+    await renderTasks();
     showToast(task.status === 'completed' ? 'Tarea completada' : 'Tarea reabierta');
 }
 
-function handleNewTask(e) {
+async function handleNewTask(e) {
     e.preventDefault();
     const title = document.getElementById('task-title').value;
     const due = document.getElementById('task-due').value;
-    db.tasks.push({
+    const courses = await dataService.getCourses();
+
+    // Using a simplified addition since we logic-shared internal db
+    const newTask = {
         id: Date.now() + Math.random(),
         title,
         due,
         status: 'pending',
         completions: 0,
-        total: db.courses[0]?.students.length || 30
-    });
-    save();
-    renderTasks();
+        total: courses[0]?.students.length || 30
+    };
+
+    // Let's add addTask to dataService for consistency
+    if (dataService.addTask) {
+        await dataService.addTask(newTask);
+    } else {
+        dataService.db.tasks.push(newTask);
+        await dataService._save();
+    }
+
+    await renderTasks();
     closeModal('task-modal');
     showToast('Tarea añadida');
     e.target.reset();
 }
 
 // --- MODULE: NOTAS ---
-function renderNotas() {
+async function renderNotas() {
     const stats = document.getElementById('stats-summary');
-    const totalStudents = db.courses.reduce((acc, c) => acc + (c.students?.length || 0), 0);
-    const totalTasks = db.tasks.length;
-    const completedTasks = db.tasks.filter(t => t.status === 'completed').length;
+    const courses = await dataService.getCourses();
+    const tasks = await dataService.getTasks();
+
+    const totalStudents = courses.reduce((acc, c) => acc + (c.students?.length || 0), 0);
+    const totalTasks = tasks.length;
+    const completedTasks = tasks.filter(t => t.status === 'completed').length;
 
     stats.innerHTML = `
         <div class="bg-primary/10 p-4 rounded-2xl">
@@ -392,8 +391,8 @@ function renderNotas() {
                 <span class="material-symbols-outlined text-xs">download</span> Exportar Todas
             </button>
         </div>
-    ` + db.courses.map(c => {
-        const { avg, count } = getCourseAverage(c.id);
+    ` + (await Promise.all(courses.map(async c => {
+        const { avg, count } = await getCourseAverage(c.id);
         const displayAvg = count === 0 ? '-' : avg.toFixed(1);
 
         return `
@@ -404,22 +403,24 @@ function renderNotas() {
             </div>
             <div class="text-lg font-black ${avg >= 6 ? 'text-primary' : (count === 0 ? 'text-slate-400' : 'text-rose-500')}">${displayAvg}</div>
         </div>
-    `}).join('<div class="h-px bg-slate-100 dark:bg-slate-700 w-full my-2"></div>');
+    `;
+    }))).join('<div class="h-px bg-slate-100 dark:bg-slate-700 w-full my-2"></div>');
 }
 
 // --- MODULE: GRADEBOOK ---
-function getCourseAverage(courseId) {
-    const course = db.courses.find(c => c.id === courseId);
+async function getCourseAverage(courseId) {
+    const course = await dataService.getCourseById(courseId);
+    const grades = await dataService.getGrades();
     if (!course || !course.students) return { avg: 0, count: 0 };
 
     let totalSum = 0;
     let totalGrades = 0;
 
     course.students.forEach(s => {
-        const gradeKeys = Object.keys(db.grades || {}).filter(k => k.startsWith(`${courseId}_`) && k.endsWith(`_${s.id}`));
+        const gradeKeys = Object.keys(grades).filter(k => k.startsWith(`${courseId}_`) && k.endsWith(`_${s.id}`));
 
         gradeKeys.forEach(k => {
-            const val = Number(db.grades[k]);
+            const val = Number(grades[k]);
             if (!isNaN(val)) {
                 totalSum += val;
                 totalGrades++;
@@ -433,17 +434,18 @@ function getCourseAverage(courseId) {
     };
 }
 
-function openGradebook(courseId) {
+async function openGradebook(courseId) {
     activeManageCourseId = courseId; // Reuse the variable
-    const course = db.courses.find(c => c.id === courseId);
+    const course = await dataService.getCourseById(courseId);
     document.getElementById('gradebook-title').textContent = `Calificaciones: ${course.name}`;
-    renderGradebook();
+    await renderGradebook();
     openModal('gradebook-modal');
 }
 
-function renderGradebook() {
-    const course = db.courses.find(c => c.id === activeManageCourseId);
+async function renderGradebook() {
+    const course = await dataService.getCourseById(activeManageCourseId);
     const list = document.getElementById('gradebook-list');
+    const grades = await dataService.getGrades();
 
     if (!course.students || course.students.length === 0) {
         list.innerHTML = `<p class="text-center text-slate-400 text-sm py-4">Agrega alumnos en la sección "Cursos" primero.</p>`;
@@ -452,7 +454,7 @@ function renderGradebook() {
 
     list.innerHTML = course.students.map(s => {
         const finalGradeKey = `${course.id}_final_${s.id}`;
-        const currentVal = db.grades[finalGradeKey] || '';
+        const currentVal = grades[finalGradeKey] || '';
 
         return `
         <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl mb-2">
@@ -471,25 +473,33 @@ function renderGradebook() {
     }).join('');
 }
 
-function saveGrade(courseId, studentId, value) {
-    if (!db.grades) db.grades = {};
+async function saveGrade(courseId, studentId, value) {
     const key = `${courseId}_final_${studentId}`;
 
     if (value === '' || isNaN(value)) {
-        delete db.grades[key];
+        // Special case: we need an 'unset' or delete method in service if we want total parity
+        // For now, let's use internal db access if we must, but strive for service
+        if (dataService.deleteGrade) {
+            await dataService.deleteGrade(key);
+        } else {
+            delete dataService.db.grades[key];
+            await dataService._save();
+        }
     } else {
-        db.grades[key] = Number(value);
+        await dataService.setGrade(key, Number(value));
     }
-    save();
-    renderNotas(); // Update background
+    await renderNotas(); // Update background
 }
 
-function exportAttendanceCSV() {
+async function exportAttendanceCSV() {
     let csv = "Curso,Estudiante,Estado\n";
-    db.courses.forEach(c => {
+    const courses = await dataService.getCourses();
+    const attendance = await dataService.getAttendance();
+
+    courses.forEach(c => {
         if (c.students) {
             c.students.forEach((s) => {
-                const status = db.attendance[`today_${c.id}_${s.id}`] || 'Pendiente';
+                const status = attendance[`today_${c.id}_${s.id}`] || 'Pendiente';
                 csv += `"${c.name}","${s.name}",${status}\n`;
             });
         }
@@ -497,13 +507,16 @@ function exportAttendanceCSV() {
     downloadCSV(csv, "reporte_asistencia.csv");
 }
 
-function exportGradesCSV() {
+async function exportGradesCSV() {
     let csv = "Curso,Estudiante,Nota Final\n";
-    db.courses.forEach(c => {
+    const courses = await dataService.getCourses();
+    const grades = await dataService.getGrades();
+
+    courses.forEach(c => {
         if (c.students) {
             c.students.forEach(s => {
-                const finalGradeKey = `${c.id}_final_${s.id} `;
-                const val = db.grades[finalGradeKey] || '-';
+                const finalGradeKey = `${c.id}_final_${s.id}`;
+                const val = grades[finalGradeKey] || '-';
                 csv += `"${c.name}","${s.name}",${val}\n`;
             });
         }
@@ -512,26 +525,28 @@ function exportGradesCSV() {
 }
 
 // --- MODULE: CLASS REGISTRY ---
-function populateCourseSelect() {
+async function populateCourseSelect() {
     const select = document.getElementById('registro-course');
-    if (db.courses.length === 0) {
+    const courses = await dataService.getCourses();
+
+    if (courses.length === 0) {
         select.innerHTML = '<option value="" disabled selected>Primero debes crear un curso</option>';
         select.disabled = true;
     } else {
         const currentValue = select.value;
         select.innerHTML = '<option value="" disabled selected>Seleccionar Curso</option>' +
-            db.courses.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+            courses.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
         if (currentValue) select.value = currentValue;
         select.disabled = false;
     }
 }
 
-function openNewClassModal() {
-    populateCourseSelect();
+async function openNewClassModal() {
+    await populateCourseSelect();
     openModal('registro-modal');
 }
 
-function handleNewClassRecord(e) {
+async function handleNewClassRecord(e) {
     e.preventDefault();
     const courseId = Number(document.getElementById('registro-course').value);
     const date = document.getElementById('registro-date').value;
@@ -550,20 +565,17 @@ function handleNewClassRecord(e) {
         homework
     };
 
-    if (!db.classRecords) db.classRecords = [];
-    db.classRecords.push(newRecord);
-    save();
-    renderClassRecords();
+    await dataService.addClassRecord(newRecord);
+    await renderClassRecords();
     closeModal('registro-modal');
     showToast('Clase registrada correctamente');
     e.target.reset();
 }
 
-function deleteClassRecord(id) {
+async function deleteClassRecord(id) {
     if (!confirm('¿Eliminar este registro de clase?')) return;
-    db.classRecords = db.classRecords.filter(r => r.id !== id);
-    save();
-    renderClassRecords();
+    await dataService.deleteClassRecord(id);
+    await renderClassRecords();
     showToast('Registro eliminado');
 }
 
@@ -578,7 +590,7 @@ function downloadCSV(csv, filename) {
 }
 
 // Init
-window.addEventListener('load', () => {
+window.addEventListener('load', async () => {
     // Service Worker Registration
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('./service-worker.js')
@@ -586,18 +598,22 @@ window.addEventListener('load', () => {
             .catch(err => console.warn('Error al registrar Service Worker', err));
     }
 
+    const currentDB = await dataService.getFullDB();
+
     // Incrementar contador de carga
-    db.loadCount = (db.loadCount || 0) + 1;
-    save();
+    currentDB.loadCount = (currentDB.loadCount || 0) + 1;
+    await dataService._save();
 
-    if (db.settings.darkMode) document.documentElement.classList.add('dark');
+    const settings = await dataService.getSettings();
+    if (settings.darkMode) document.documentElement.classList.add('dark');
 
-    if (!db.userName) {
+    const userName = await dataService.getUserName();
+    if (!userName) {
         document.getElementById('welcome-modal').classList.remove('hidden');
     } else {
-        updateGreeting();
+        await updateGreeting();
     }
 
-    navigate('cursos');
-    console.log(`Sesión #${db.loadCount} iniciada.`);
+    await navigate('cursos');
+    console.log(`Sesión #${currentDB.loadCount} iniciada.`);
 });

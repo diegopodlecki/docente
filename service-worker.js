@@ -1,9 +1,9 @@
-const CACHE_NAME = 'agenda-docente-v8';
+const CACHE_NAME = 'agenda-docente-v10';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
     './css/style.css',
-    './js/storage.js',
+    './js/dataService.js',
     './js/ui.js',
     './js/app.js',
     './manifest.json',
@@ -14,6 +14,7 @@ const ASSETS_TO_CACHE = [
     './js/exportar.js',
     './js/backup.js',
     './js/inteligente.js',
+    './js/planificador.js',
     'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap',
     'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200'
 ];

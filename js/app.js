@@ -1,3 +1,4 @@
+// authService will be available globally after its script loads
 let courseToDeleteId = null;
 let activeManageCourseId = null;
 
@@ -680,6 +681,18 @@ window.addEventListener('load', async () => {
         document.getElementById('welcome-modal').classList.remove('hidden');
     } else {
         await updateGreeting();
+    }
+
+    // observe firebase auth state
+    if (typeof authService !== 'undefined' && authService.observeAuthState) {
+        authService.observeAuthState(async (user) => {
+            if (user) {
+                await dataService.updateSettings({ userUid: user.uid });
+                await updateGreeting();
+            } else {
+                await updateGreeting();
+            }
+        });
     }
 
     await navigate('cursos');

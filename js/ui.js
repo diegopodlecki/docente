@@ -1,3 +1,5 @@
+// authService is a global object provided by authService.js
+
 const modalTimeouts = {};
 let toastTimeout;
 
@@ -47,15 +49,62 @@ async function handleLogin(e) {
     showToast(`¡Un gusto verte, ${name}!`);
 }
 
-async function updateGreeting() {
-    const greeting = document.getElementById('user-greeting');
-    const userName = await dataService.getUserName();
-    if (userName) {
-        greeting.textContent = `¡Hola, ${userName}! 👋`;
+// Google auth handlers
+async function handleGoogleLogin() {
+    try {
+        const user = await authService.signInWithGoogle();
+        // remember uid in settings
+        await dataService.updateSettings({ userUid: user.uid });
+        // store user name locally too
+        if (user.displayName) {
+            await dataService.setUserName(user.displayName);
+        }
+        document.getElementById('welcome-modal').classList.add('hidden');
+        await updateGreeting();
+        showToast(`Bienvenido, ${user.displayName || 'Docente'}`);
+    } catch (err) {
+        console.error("Google sign-in failed", err);
+        showToast('Error al iniciar sesión');
     }
 }
 
+async function handleSignOut() {
+    await authService.signOutUser();
+    await dataService.updateSettings({ userUid: null });
+    await updateGreeting();
+    showToast('Sesión cerrada');
+}
+
+async function updateGreeting() {
+    const greeting = document.getElementById('user-greeting');
+    const photo = document.getElementById('user-photo');
+    const signoutBtn = document.getElementById('signout-btn');
+
+    // prefer firebase user
+    const fbUser = authService.getCurrentUser();
+    if (fbUser) {
+        greeting.textContent = `¡Hola, ${fbUser.displayName || 'Docente'}! 👋`;
+        if (fbUser.photoURL) {
+            photo.src = fbUser.photoURL;
+            photo.classList.remove('hidden');
+        } else {
+            photo.classList.add('hidden');
+        }
+        signoutBtn.classList.remove('hidden');
+        return;
+    }
+
+    const userName = await dataService.getUserName();
+    if (userName) {
+        greeting.textContent = `¡Hola, ${userName}! 👋`;
+        photo.classList.add('hidden');
+    }
+    signoutBtn.classList.add('hidden');
+}
+
 async function renderDashboard() {
+    // ensure greeting and auth state up to date
+    await updateGreeting();
     const container = document.getElementById('dashboard-container');
     const coursesCount = document.getElementById('dash-courses-count');
     const recordsCount = document.getElementById('dash-records-count');

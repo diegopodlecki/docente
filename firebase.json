@@ -1,15 +1,10 @@
 ﻿{
   "hosting": {
-    "public": ".",
+    "public": "public",
     "ignore": [
       "firebase.json",
       "**/.*",
-      "**/node_modules/**",
-      "testsprite_tests/**",
-      "routes/**",
-      "services/**",
-      "server.js",
-      "package*.json"
+      "**/node_modules/**"
     ],
     "rewrites": [
       {

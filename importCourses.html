@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Importar Cursos de Classroom</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 1rem; }
+        button { padding: 0.5rem 1rem; font-size: 1rem; }
+        ul { margin-top: 1rem; }
+    </style>
+</head>
+<body>
+    <h1>Importar Cursos de Google Classroom</h1>
+    <button id="importBtn">Importar Google Classroom Courses</button>
+    <ul id="courseList"></ul>
+
+    <script>
+        document.getElementById('importBtn').addEventListener('click', async () => {
+            const listEl = document.getElementById('courseList');
+            listEl.innerHTML = 'Cargando...';
+
+            try {
+                const resp = await fetch('/classroom/courses');
+                if (!resp.ok) throw new Error('HTTP ' + resp.status);
+                const data = await resp.json();
+                const courses = data.courses || [];
+
+                if (courses.length === 0) {
+                    listEl.innerHTML = '<li>No se encontraron cursos.</li>';
+                    return;
+                }
+
+                listEl.innerHTML = '';
+                courses.forEach(c => {
+                    const li = document.createElement('li');
+                    li.textContent = c.name || c.courseState || '(sin nombre)';
+                    listEl.appendChild(li);
+                });
+            } catch (err) {
+                console.error(err);
+                listEl.innerHTML = '<li>Error al cargar los cursos.</li>';
+            }
+        });
+    </script>
+</body>
+</html>

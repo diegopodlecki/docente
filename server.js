@@ -5,6 +5,13 @@ const { google } = require("googleapis");
 const app = express();
 const port = process.env.PORT || 3000;
 
+// parse JSON bodies (if you ever send JSON from frontend)
+app.use(express.json());
+
+// classroom endpoints
+const classroomRoutes = require('./routes/classroomRoutes');
+app.use('/classroom', classroomRoutes);
+
 // redirect the user to Google's OAuth consent screen
 app.get("/auth/google", (req, res) => {
   const url = getAuthUrl();

@@ -14,7 +14,7 @@ const DEFAULT_DATA = {
     attendance: {}, // { 'date_courseId_studentId': status }
     grades: {}, // { 'courseId_taskId_studentId': gradeValue }
     classRecords: [], // { id, cursoId, fecha, tema, notes, homework }
-    settings: { darkMode: false }
+    settings: { darkMode: false, lastQuickCourse: null }
 };
 
 class DataService {

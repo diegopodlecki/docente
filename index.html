@@ -102,6 +102,11 @@
                             <span class="material-symbols-outlined text-[32px] mb-2">history_edu</span>
                             <span class="text-xs font-bold uppercase tracking-wider">Nueva Clase</span>
                         </button>
+                        <button onclick="openQuickClassModal()"
+                            class="flex flex-col items-center justify-center p-4 bg-emerald-500 text-white rounded-[24px] shadow-lg shadow-emerald-500/30 active:scale-95 transition-transform">
+                            <span class="material-symbols-outlined text-[32px] mb-2">bolt</span>
+                            <span class="text-xs font-bold uppercase tracking-wider">Clase rápida</span>
+                        </button>
                         <button onclick="openModal('course-modal')"
                             class="flex flex-col items-center justify-center p-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-[24px] active:scale-95 transition-transform">
                             <span class="material-symbols-outlined text-[32px] mb-2">library_add</span>
@@ -422,6 +427,30 @@
                 <p class="text-[10px] font-medium mt-1">Agenda</p>
             </button>
         </nav>
+
+        <!-- MODAL: QUICK CLASS -->
+        <div id="quick-class-modal" class="fixed inset-0 z-[100] hidden">
+            <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeModal('quick-class-modal')"></div>
+            <div class="absolute bottom-0 left-0 right-0 bg-white dark:bg-slate-900 rounded-t-[32px] p-6 max-w-md mx-auto shadow-2xl transition-transform transform translate-y-full"
+                id="quick-class-modal-panel">
+                <div class="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mx-auto mb-6"></div>
+                <h3 class="text-xl font-bold mb-6 text-center">Clase Rápida</h3>
+                <form onsubmit="handleQuickClass(event)" class="space-y-4">
+                    <select id="quick-course" required
+                        class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary h-14">
+                        <option value="" disabled selected>Seleccionar Curso</option>
+                    </select>
+                    <input type="text" id="quick-topic" placeholder="Tema visto" required
+                        class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary h-14">
+                    <div class="flex gap-3">
+                        <button type="button" onclick="closeModal('quick-class-modal')"
+                            class="flex-1 bg-slate-100 dark:bg-slate-800 font-bold py-4 rounded-2xl transition-colors">Cancelar</button>
+                        <button type="submit"
+                            class="flex-1 bg-primary text-white font-bold py-4 rounded-2xl shadow-lg shadow-primary/30">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
 
         <!-- MODAL: ADD COURSE -->
         <div id="course-modal" class="fixed inset-0 z-[100] hidden">

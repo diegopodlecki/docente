@@ -104,6 +104,9 @@ async function handleNewCourse(e) {
     };
     await dataService.addCourse(newCourse);
     await renderCourses();
+    // update selectors
+    await populateCourseSelect();
+    await populateCourseSelect('quick-course');
     closeModal('course-modal');
     showToast('Curso añadido');
     e.target.reset();
@@ -123,6 +126,8 @@ async function confirmDeleteCourse() {
     closeModal('confirm-delete-modal');
     showToast('Curso y datos asociados eliminados');
     await renderCourses();
+    await populateCourseSelect();
+    await populateCourseSelect('quick-course');
     courseToDeleteId = null;
 }
 
@@ -499,8 +504,9 @@ async function exportGradesCSV() {
 }
 
 // --- MODULE: CLASS REGISTRY ---
-async function populateCourseSelect() {
-    const select = document.getElementById('registro-course');
+async function populateCourseSelect(selectId = 'registro-course', defaultValue) {
+    const select = document.getElementById(selectId);
+    if (!select) return;
     const courses = await dataService.getCourses();
 
     if (courses.length === 0) {
@@ -509,22 +515,15 @@ async function populateCourseSelect() {
     } else {
         select.innerHTML = '<option value="" disabled selected>Seleccionar Curso</option>' +
             courses.map(c => `<option value="${c.id}">${c.nombre} (${c.año})</option>`).join('');
+        if (defaultValue) select.value = defaultValue;
         select.disabled = false;
     }
 }
 
 async function updateCourseSelector() {
-    const select = document.getElementById('registro-course');
-    const courses = await dataService.getCourses();
-
-    if (courses.length === 0) {
-        select.innerHTML = '<option value="" disabled selected>Primero debes crear un curso</option>';
-        select.disabled = true;
-    } else {
-        select.innerHTML = '<option value="" disabled selected>Seleccionar Curso</option>' +
-            courses.map(c => `<option value="${c.id}">${c.nombre} (${c.año})</option>`).join('');
-        select.disabled = false;
-    }
+    // keep for backward compatibility, update both selectors
+    await populateCourseSelect('registro-course');
+    await populateCourseSelect('quick-course');
 }
 
 async function openNewClassModal() {
@@ -598,6 +597,36 @@ async function renderGestionCursos() {
             </div>
         </article>
     `).join('');
+}
+
+// Quick class helpers
+async function openQuickClassModal() {
+    const settings = await dataService.getSettings();
+    const last = settings.lastQuickCourse;
+    await populateCourseSelect('quick-course', last);
+    openModal('quick-class-modal');
+}
+
+async function handleQuickClass(e) {
+    e.preventDefault();
+    const cursoId = Number(document.getElementById('quick-course').value);
+    const tema = document.getElementById('quick-topic').value;
+    if (!cursoId || !tema) return;
+    const today = new Date().toISOString().split('T')[0];
+    const newRecord = {
+        id: Date.now(),
+        cursoId,
+        fecha: today,
+        tema,
+        notes: '',
+        homework: ''
+    };
+    await dataService.addClass(newRecord);
+    // remember course
+    await dataService.updateSettings({ lastQuickCourse: cursoId });
+    await renderClassRecords();
+    closeModal('quick-class-modal');
+    showToast('Clase rápida registrada');
 }
 
 async function handleAddCourseFromGestion(e) {

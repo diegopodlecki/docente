@@ -17,7 +17,7 @@ async function populatePlannerCourseSelect() {
         select.innerHTML = '<option value="" disabled selected>Primero debes crear un curso</option>';
         select.disabled = true;
     } else {
-        select.innerHTML = courses.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        select.innerHTML = courses.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
         select.disabled = false;
     }
 }
@@ -104,13 +104,13 @@ async function savePlannerToRecords() {
     for (let i = 0; i < titles.length; i++) {
         const record = {
             id: Date.now() + Math.random(),
-            courseId,
-            date: today,
-            topic: titles[i].value,
+            cursoId,
+            fecha: today,
+            tema: titles[i].value,
             notes: descriptions[i].value,
             homework: ''
         };
-        await dataService.addClassRecord(record);
+        await dataService.addClass(record);
     }
 
     if (typeof showToast === 'function') showToast(`${titles.length} clases guardadas!`);

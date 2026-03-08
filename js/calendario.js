@@ -37,7 +37,7 @@ async function renderCalendar() {
         const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 
         // Find classes for this day
-        const dayClasses = records.filter(r => r.date === dateStr);
+        const dayClasses = records.filter(r => r.fecha === dateStr);
         const hasClass = dayClasses.length > 0;
 
         let indicator = '';
@@ -63,7 +63,7 @@ async function showCalendarDayDetails(dateStr) {
 
     const records = await dataService.getClassRecords();
     const courses = await dataService.getCourses();
-    const dayClasses = records.filter(r => r.date === dateStr);
+    const dayClasses = records.filter(r => r.fecha === dateStr);
 
     const dateObj = new Date(dateStr + 'T12:00:00'); // Force local noon to avoid timezone shift
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
@@ -89,7 +89,7 @@ async function showCalendarDayDetails(dateStr) {
     `;
 
     dayClasses.forEach(r => {
-        const course = courses.find(c => c.id === r.courseId);
+        const course = courses.find(c => c.id === r.cursoId);
         html += `
             <div class="bg-white dark:bg-slate-800 p-5 rounded-[24px] shadow-sm border border-slate-100 dark:border-slate-800/50 relative group transition-all animation-fade-in">
                 <div class="flex items-start justify-between mb-3">
@@ -98,8 +98,8 @@ async function showCalendarDayDetails(dateStr) {
                             <span class="material-symbols-outlined text-lg">history_edu</span>
                         </div>
                         <div>
-                            <h4 class="font-black text-sm leading-tight">${course ? course.name : 'Curso eliminado'}</h4>
-                            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">${r.topic}</p>
+                            <h4 class="font-black text-sm leading-tight">${course ? course.nombre : 'Curso eliminado'}</h4>
+                            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">${r.tema}</p>
                         </div>
                     </div>
                 </div>

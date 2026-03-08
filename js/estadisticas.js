@@ -21,9 +21,9 @@ async function renderStatistics() {
     // 2. Curso con más clases
     const courseCounts = {};
     records.forEach(r => {
-        const course = courses.find(c => c.id === r.courseId);
-        const name = course ? course.name : 'Curso eliminado';
-        courseCounts[name] = (courseCounts[name] || 0) + 1;
+        const course = courses.find(c => c.id === r.cursoId);
+        const nombre = course ? course.nombre : 'Curso eliminado';
+        courseCounts[nombre] = (courseCounts[nombre] || 0) + 1;
     });
     let topCourse = '';
     let topCourseCount = 0;
@@ -38,8 +38,8 @@ async function renderStatistics() {
     const topicCounts = {};
     records.forEach(r => {
         // Normalizar tema (minúsculas, sin espacios extra)
-        const topic = (r.topic || '').trim().toLowerCase();
-        if (topic) topicCounts[topic] = (topicCounts[topic] || 0) + 1;
+        const tema = (r.tema || '').trim().toLowerCase();
+        if (tema) topicCounts[tema] = (topicCounts[tema] || 0) + 1;
     });
     let topTopic = '';
     let topTopicCount = 0;
@@ -60,7 +60,7 @@ async function renderStatistics() {
     const currentYear = now.getFullYear();
     let currentMonthClasses = 0;
     records.forEach(r => {
-        const [year, month, day] = r.date.split('-');
+        const [year, month, day] = r.fecha.split('-');
         if (parseInt(year) === currentYear && parseInt(month) - 1 === currentMonth) {
             currentMonthClasses++;
         }

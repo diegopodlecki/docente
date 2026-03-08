@@ -68,24 +68,24 @@ async function renderDashboard() {
     coursesCount.textContent = courses.length;
     recordsCount.textContent = classRecords.length;
 
-    // Latest 3 records (Sorted by date DESC, then ID DESC as tie-breaker)
+    // Latest 3 records (Sorted by fecha DESC, then ID DESC as tie-breaker)
     const recent = [...classRecords]
-        .sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id)
+        .sort((a, b) => b.fecha.localeCompare(a.fecha) || b.id - a.id)
         .slice(0, 3);
 
     if (recent.length === 0) {
         recentList.innerHTML = `<p class="text-center text-xs text-slate-400 py-4 italic">No hay registros recientes</p>`;
     } else {
         recentList.innerHTML = recent.map(r => {
-            const course = courses.find(c => c.id === r.courseId);
+            const course = courses.find(c => c.id === r.cursoId);
             return `
                 <div class="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800">
                     <div class="size-10 rounded-xl bg-white dark:bg-slate-900 flex items-center justify-center text-primary border border-slate-100 dark:border-slate-800">
                         <span class="material-symbols-outlined text-xl">history_edu</span>
                     </div>
                     <div class="flex-1 overflow-hidden">
-                        <p class="text-xs font-bold truncate">${course ? course.name : 'Curso eliminado'}</p>
-                        <p class="text-[10px] text-slate-500">${r.date} • ${r.topic}</p>
+                        <p class="text-xs font-bold truncate">${course ? course.nombre : 'Curso eliminado'}</p>
+                        <p class="text-[10px] text-slate-500">${r.fecha} • ${r.tema}</p>
                     </div>
                 </div>
             `;
@@ -122,8 +122,8 @@ async function renderWeeklyAgenda() {
                     ${dayCourses.map(c => `
                         <div class="flex items-center justify-between p-4 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
                             <div>
-                                <p class="font-bold text-slate-900 dark:text-white">${c.name}</p>
-                                <p class="text-[10px] text-slate-500 font-medium uppercase tracking-wider">${c.schedule}</p>
+                                <p class="font-bold text-slate-900 dark:text-white">${c.nombre}</p>
+                                <p class="text-[10px] text-slate-500 font-medium uppercase tracking-wider">${c.schedule} • ${c.año}</p>
                             </div>
                             <span class="material-symbols-outlined text-primary">event</span>
                         </div>
@@ -145,8 +145,8 @@ async function renderClassRecords(filter = '') {
     }
 
     const query = filter.toLowerCase().trim();
-    // Use a copy to avoid in-place sorting side effects. Sort by date DESC, then ID DESC.
-    let records = [...classRecords].sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id);
+    // Use a copy to avoid in-place sorting side effects. Sort by fecha DESC, then ID DESC.
+    let records = [...classRecords].sort((a, b) => b.fecha.localeCompare(a.fecha) || b.id - a.id);
 
     // Actualizar el contador total/filtrado
     const updateCounter = (count) => {
@@ -156,18 +156,18 @@ async function renderClassRecords(filter = '') {
 
     if (query) {
         records = records.filter(r => {
-            const course = courses.find(c => c.id === r.courseId);
-            const courseName = course ? course.name.toLowerCase() : 'curso eliminado';
-            const topic = (r.topic || '').toLowerCase();
+            const course = courses.find(c => c.id === r.cursoId);
+            const courseName = course ? course.nombre.toLowerCase() : 'curso eliminado';
+            const tema = (r.tema || '').toLowerCase();
             const notes = (r.notes || '').toLowerCase();
             const homework = (r.homework || '').toLowerCase();
-            const date = (r.date || '').toLowerCase();
+            const fecha = (r.fecha || '').toLowerCase();
 
             return courseName.includes(query) ||
-                topic.includes(query) ||
+                tema.includes(query) ||
                 notes.includes(query) ||
                 homework.includes(query) ||
-                date.includes(query);
+                fecha.includes(query);
         });
     }
 
@@ -184,24 +184,27 @@ async function renderClassRecords(filter = '') {
     }
 
     list.innerHTML = records.map(r => {
-        const course = courses.find(c => c.id === r.courseId);
+        const course = courses.find(c => c.id === r.cursoId);
         return `
             <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm relative group overflow-hidden">
                 <div class="flex items-start gap-4">
                     <div class="flex-shrink-0 w-12 text-center">
-                        <p class="text-[10px] font-black uppercase text-slate-400 leading-tight">${r.date.split('-')[1] || ''}</p>
-                        <p class="text-xl font-black text-primary leading-tight">${r.date.split('-')[2] || ''}</p>
+                        <p class="text-[10px] font-black uppercase text-slate-400 leading-tight">${r.fecha.split('-')[1] || ''}</p>
+                        <p class="text-xl font-black text-primary leading-tight">${r.fecha.split('-')[2] || ''}</p>
                     </div>
-                    
                     <div class="flex-1 min-w-0">
                         <div class="flex justify-between items-start mb-1">
-                            <h3 class="font-bold text-slate-900 dark:text-white truncate pr-10">${course ? course.name : 'Curso eliminado'}</h3>
-                            <button onclick="deleteClassRecord(${r.id})" class="absolute right-2 top-2 size-10 flex items-center justify-center text-rose-500 bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-500/20 rounded-xl transition-all active:scale-90" title="Eliminar registro">
-                                <span class="material-symbols-outlined text-lg">delete</span>
-                            </button>
+                            <h3 class="font-bold text-slate-900 dark:text-white truncate pr-10">${course ? course.nombre : 'Curso eliminado'}</h3>
+                            <div class="flex gap-1 absolute right-2 top-2">
+                                <button onclick="openEditClassRecord('${r.id}')" class="size-10 flex items-center justify-center text-primary bg-primary/10 hover:bg-primary/20 rounded-xl transition-all active:scale-90 mr-1" title="Editar registro">
+                                    <span class="material-symbols-outlined text-lg">edit</span>
+                                </button>
+                                <button onclick="deleteClassRecord('${r.id}')" class="size-10 flex items-center justify-center text-rose-500 bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-500/20 rounded-xl transition-all active:scale-90" title="Eliminar registro">
+                                    <span class="material-symbols-outlined text-lg">delete</span>
+                                </button>
+                            </div>
                         </div>
-                        <p class="text-xs font-bold text-primary mb-1">${r.topic}</p>
-                        
+                        <p class="text-xs font-bold text-primary mb-1">${r.tema}</p>
                         <div class="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-slate-50 dark:border-slate-700/50">
                             <div>
                                 <p class="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-0.5">Notas</p>
@@ -217,4 +220,69 @@ async function renderClassRecords(filter = '') {
             </div>
         `;
     }).join('');
+
+    // Modal de edición (solo uno en el DOM)
+    if (!document.getElementById('edit-class-modal')) {
+        const modal = document.createElement('div');
+        modal.id = 'edit-class-modal';
+        modal.className = 'hidden fixed inset-0 z-50 flex items-center justify-center bg-black/30';
+        modal.innerHTML = `
+            <div id="edit-class-modal-panel" class="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-md shadow-xl translate-y-full transition-transform">
+                <h2 class="text-lg font-bold mb-4">Editar registro de clase</h2>
+                <form id="edit-class-form" class="space-y-3">
+                    <input type="hidden" id="edit-class-id">
+                    <div>
+                        <label class="block text-xs font-bold mb-1">Fecha</label>
+                        <input type="date" id="edit-class-fecha" class="w-full p-2 rounded border border-slate-200 dark:bg-slate-900">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold mb-1">Tema</label>
+                        <input type="text" id="edit-class-tema" class="w-full p-2 rounded border border-slate-200 dark:bg-slate-900">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold mb-1">Notas</label>
+                        <textarea id="edit-class-notes" class="w-full p-2 rounded border border-slate-200 dark:bg-slate-900"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold mb-1">Tarea</label>
+                        <textarea id="edit-class-homework" class="w-full p-2 rounded border border-slate-200 dark:bg-slate-900"></textarea>
+                    </div>
+                    <div class="flex justify-end gap-2 mt-4">
+                        <button type="button" onclick="closeModal('edit-class-modal')" class="px-4 py-2 rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-white font-bold">Cancelar</button>
+                        <button type="submit" class="px-4 py-2 rounded bg-primary text-white font-bold">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        document.getElementById('edit-class-form').onsubmit = handleEditClassRecord;
+    }
+}
+
+// Abre el modal de edición y carga los datos
+window.openEditClassRecord = async function(id) {
+    const records = await dataService.getClassRecords();
+    const record = records.find(r => r.id == id);
+    if (!record) return;
+    document.getElementById('edit-class-id').value = record.id;
+    document.getElementById('edit-class-fecha').value = record.fecha;
+    document.getElementById('edit-class-tema').value = record.tema;
+    document.getElementById('edit-class-notes').value = record.notes || '';
+    document.getElementById('edit-class-homework').value = record.homework || '';
+    openModal('edit-class-modal');
+}
+
+// Maneja el submit del modal de edición
+async function handleEditClassRecord(e) {
+    e.preventDefault();
+    const id = document.getElementById('edit-class-id').value;
+    const fecha = document.getElementById('edit-class-fecha').value;
+    const tema = document.getElementById('edit-class-tema').value;
+    const notes = document.getElementById('edit-class-notes').value;
+    const homework = document.getElementById('edit-class-homework').value;
+    await dataService.updateClass({ id, fecha, tema, notes, homework });
+    closeModal('edit-class-modal');
+    showToast('Registro actualizado');
+    if (typeof renderClassRecords === 'function') renderClassRecords();
+}
 }

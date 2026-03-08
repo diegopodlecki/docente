@@ -355,6 +355,25 @@
                 </div>
             </section>
 
+            <!-- NUEVA SECCIÓN: GESTIÓN DE CURSOS -->
+            <section id="view-gestion-cursos" class="view-section hidden">
+                <div class="px-4 pt-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h2 class="text-2xl font-bold">Gestión de Cursos</h2>
+                            <p class="text-sm text-slate-500 dark:text-slate-400">Añade, edita o elimina cursos</p>
+                        </div>
+                        <button onclick="openModal('course-modal')"
+                            class="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-white shadow-lg shadow-primary/30 active:scale-95 transition-transform">
+                            <span class="material-symbols-outlined">add</span>
+                        </button>
+                    </div>
+                    <div id="gestion-courses-list" class="grid grid-cols-1 gap-4">
+                        <!-- Rendered dynamically -->
+                    </div>
+                </div>
+            </section>
+
         </main>
 
         <!-- Navigation Bar -->
@@ -414,6 +433,8 @@
                 <form onsubmit="handleNewCourse(event)" class="space-y-4">
                     <input type="text" id="course-name" placeholder="Nombre del Curso (ej: Física I)" required
                         class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary h-14">
+                    <input type="text" id="course-year" placeholder="Año (ej: 2026)" required
+                        class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary h-14 transition-all duration-300">
                     <select id="course-day" required
                         class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary h-14">
                         <option value="" disabled selected>Seleccionar Día</option>
@@ -446,6 +467,8 @@
                 <form onsubmit="handleEditCourse(event)" class="space-y-4">
                     <input type="hidden" id="edit-course-id">
                     <input type="text" id="edit-course-name" placeholder="Nombre del Curso" required
+                        class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary h-14">
+                    <input type="text" id="edit-course-year" placeholder="Año" required
                         class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary h-14">
                     <select id="edit-course-day" required
                         class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary h-14">

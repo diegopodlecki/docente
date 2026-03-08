@@ -15,17 +15,17 @@ async function exportToCSV() {
     csvContent += 'Fecha,Curso,Tema,Notas,Tarea\n';
 
     // Sort descending for the export too
-    const sortedRecords = [...records].sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id);
+    const sortedRecords = [...records].sort((a, b) => b.fecha.localeCompare(a.fecha) || b.id - a.id);
 
     sortedRecords.forEach(r => {
-        const course = courses.find(c => c.id === r.courseId);
-        const courseName = course ? course.name.replace(/,/g, '') : 'Curso eliminado'; // Strip commas to avoid CSV issues
-        const date = r.date;
-        const topic = (r.topic || '').replace(/,/g, ' '); // Avoid commas in text fields
+        const course = courses.find(c => c.id === r.cursoId);
+        const courseName = course ? course.nombre.replace(/,/g, '') : 'Curso eliminado'; // Strip commas to avoid CSV issues
+        const fecha = r.fecha;
+        const tema = (r.tema || '').replace(/,/g, ' '); // Avoid commas in text fields
         const notes = (r.notes || '').replace(/,/g, ' ').replace(/\n/g, ' ');
         const homework = (r.homework || '').replace(/,/g, ' ').replace(/\n/g, ' ');
 
-        csvContent += `${date},${courseName},${topic},${notes},${homework}\n`;
+        csvContent += `${fecha},${courseName},${tema},${notes},${homework}\n`;
     });
 
     // Create a Blob and trigger download

@@ -68,9 +68,7 @@ async function renderCourses() {
     list.innerHTML = courses.map(c => `
         <article class="bg-white dark:bg-slate-800 rounded-3xl overflow-hidden border border-slate-100 dark:border-slate-800 shadow-sm relative group">
             <div class="h-28 relative" style="background: linear-gradient(135deg, ${c.color} 0%, #6394ff 100%);">
-                <div class="absolute top-4 right-4 bg-white/20 backdrop-blur-md text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">${c.schedule}</div>
-                
-                <!-- Course Actions -->
+                <div class="absolute top-4 right-4 bg-white/20 backdrop-blur-md text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">${c.schedule} • ${c.año}</div>
                 <div class="absolute top-4 left-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button onclick="openEditCourse(${c.id})" class="size-8 bg-white/20 hover:bg-white/40 backdrop-blur-md text-white rounded-full flex items-center justify-center transition-colors">
                         <span class="material-symbols-outlined text-[16px]">edit</span>
@@ -81,22 +79,8 @@ async function renderCourses() {
                 </div>
             </div>
             <div class="p-5">
-                <h3 class="text-xl font-bold mb-1">${c.name}</h3>
-                <div class="flex items-center justify-between mb-4">
-                    <p class="text-xs text-slate-500">${c.students.length} Estudiantes inscritos</p>
-                    <button onclick="openManageStudents(${c.id})" class="text-[10px] font-bold text-primary uppercase tracking-wider hover:underline flex items-center gap-1">
-                        <span class="material-symbols-outlined text-[14px]">group_add</span> Gestionar
-                    </button>
-                </div>
-                <div class="space-y-2">
-                    <div class="flex justify-between text-[11px] font-bold uppercase tracking-tight">
-                        <span class="text-slate-400">Progreso</span>
-                        <span class="text-primary">${c.progress}%</span>
-                    </div>
-                    <div class="w-full bg-slate-100 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
-                        <div class="bg-primary h-full transition-all duration-700" style="width: ${c.progress}%"></div>
-                    </div>
-                </div>
+                <h3 class="text-xl font-bold mb-1">${c.nombre}</h3>
+                <p class="text-xs text-slate-500">${c.students.length} Estudiantes inscritos</p>
             </div>
         </article>
     `).join('');
@@ -104,12 +88,14 @@ async function renderCourses() {
 
 async function handleNewCourse(e) {
     e.preventDefault();
-    const name = document.getElementById('course-name').value;
+    const nombre = document.getElementById('course-name').value;
+    const año = document.getElementById('course-year').value;
     const day = document.getElementById('course-day').value;
     const schedule = document.getElementById('course-schedule').value;
     const newCourse = {
         id: Date.now(),
-        name,
+        nombre,
+        año,
         day,
         schedule,
         progress: 0,
@@ -144,7 +130,8 @@ async function openEditCourse(id) {
     const course = await dataService.getCourseById(id);
     if (!course) return;
     document.getElementById('edit-course-id').value = course.id;
-    document.getElementById('edit-course-name').value = course.name;
+    document.getElementById('edit-course-name').value = course.nombre;
+    document.getElementById('edit-course-year').value = course.año || new Date().getFullYear();
     document.getElementById('edit-course-day').value = course.day || 'Lunes';
     document.getElementById('edit-course-schedule').value = course.schedule;
     openModal('edit-course-modal');
@@ -153,11 +140,12 @@ async function openEditCourse(id) {
 async function handleEditCourse(e) {
     e.preventDefault();
     const id = Number(document.getElementById('edit-course-id').value);
-    const name = document.getElementById('edit-course-name').value;
+    const nombre = document.getElementById('edit-course-name').value;
+    const año = document.getElementById('edit-course-year').value;
     const day = document.getElementById('edit-course-day').value;
     const schedule = document.getElementById('edit-course-schedule').value;
 
-    await dataService.updateCourse(id, { name, day, schedule });
+    await dataService.updateCourse(id, { nombre, año, day, schedule });
     await renderCourses();
     closeModal('edit-course-modal');
     showToast('Curso editado');
@@ -166,7 +154,7 @@ async function handleEditCourse(e) {
 async function openManageStudents(id) {
     activeManageCourseId = id;
     const course = await dataService.getCourseById(id);
-    document.getElementById('manage-students-title').textContent = `Alumnos: ${course.name}`;
+    document.getElementById('manage-students-title').textContent = `Alumnos: ${course.nombre}`;
     await renderManageStudents();
     openModal('manage-students-modal');
 }
@@ -234,7 +222,7 @@ async function renderAttendance() {
     }
 
     filters.innerHTML = courses.map((c, i) => `
-        <button onclick="renderAttendanceList(${c.id})" class="px-4 py-2 whitespace-nowrap rounded-xl text-sm font-bold transition-all ${i === 0 ? 'bg-primary text-white shadow-md' : 'bg-slate-100 dark:bg-slate-800'}">${c.name}</button>
+        <button onclick="renderAttendanceList(${c.id})" class="px-4 py-2 whitespace-nowrap rounded-xl text-sm font-bold transition-all ${i === 0 ? 'bg-primary text-white shadow-md' : 'bg-slate-100 dark:bg-slate-800'}">${c.nombre}</button>
     `).join('');
 
     // Auto-select first course when entering view
@@ -248,7 +236,7 @@ async function renderAttendanceList(courseId) {
     // Update active visual state for buttons
     const filters = document.getElementById('attendance-course-filters');
     Array.from(filters.children).forEach(btn => {
-        if (btn.textContent === courses.find(c => c.id === courseId)?.name) {
+        if (btn.textContent === courses.find(c => c.id === courseId)?.nombre) {
             btn.className = "px-4 py-2 whitespace-nowrap rounded-xl text-sm font-bold transition-all bg-primary text-white shadow-md";
         } else {
             btn.className = "px-4 py-2 whitespace-nowrap rounded-xl text-sm font-bold transition-all bg-slate-100 dark:bg-slate-800";
@@ -326,9 +314,7 @@ async function toggleTaskStatus(taskId) {
     const task = tasks.find(t => t.id === taskId);
     if (!task) return;
     task.status = task.status === 'completed' ? 'pending' : 'completed';
-    // We don't have updateTask in dataService yet, let's use a generic save or add it
-    // For now, let's use the internal db since it's shared, but correctly we should add updateTask
-    await dataService._save();
+    await dataService.updateTask(task);
     await renderTasks();
     showToast(task.status === 'completed' ? 'Tarea completada' : 'Tarea reabierta');
 }
@@ -350,12 +336,7 @@ async function handleNewTask(e) {
     };
 
     // Let's add addTask to dataService for consistency
-    if (dataService.addTask) {
-        await dataService.addTask(newTask);
-    } else {
-        dataService.db.tasks.push(newTask);
-        await dataService._save();
-    }
+    await dataService.addTask(newTask);
 
     await renderTasks();
     closeModal('task-modal');
@@ -375,7 +356,7 @@ async function renderNotas() {
 
     stats.innerHTML = `
         <div class="bg-primary/10 p-4 rounded-2xl">
-            <p class="text-[10px] font-bold text-primary uppercase tracking-wider mb-1">Total Alumnos</p>
+            <p class="text-[10px] font-bold text-primary uppercase tracking-widest mb-1">Total Alumnos</p>
             <p class="text-2xl font-black text-primary">${totalStudents}</p>
         </div>
         <div class="bg-emerald-500/10 p-4 rounded-2xl">
@@ -398,8 +379,8 @@ async function renderNotas() {
         return `
         <div class="flex items-center justify-between py-2">
             <div class="flex-1" onclick="openGradebook(${c.id})" style="cursor: pointer;">
-                <p class="text-sm font-bold hover:text-primary transition-colors">${c.name} <span class="material-symbols-outlined text-[12px] text-slate-400">edit</span></p>
-                <p class="text-[10px] text-slate-400">${c.students?.length || 0} alumnos • ${count} notas</p>
+                <p class="text-sm font-bold hover:text-primary transition-colors">${c.nombre} <span class="material-symbols-outlined text-[12px] text-slate-400">edit</span></p>
+                <p class="text-[10px] text-slate-400">${c.students?.length || 0} alumnos • ${c.año || ''} • ${count} notas</p>
             </div>
             <div class="text-lg font-black ${avg >= 6 ? 'text-primary' : (count === 0 ? 'text-slate-400' : 'text-rose-500')}">${displayAvg}</div>
         </div>
@@ -437,7 +418,7 @@ async function getCourseAverage(courseId) {
 async function openGradebook(courseId) {
     activeManageCourseId = courseId; // Reuse the variable
     const course = await dataService.getCourseById(courseId);
-    document.getElementById('gradebook-title').textContent = `Calificaciones: ${course.name}`;
+    document.getElementById('gradebook-title').textContent = `Calificaciones: ${course.nombre}`;
     await renderGradebook();
     openModal('gradebook-modal');
 }
@@ -477,14 +458,7 @@ async function saveGrade(courseId, studentId, value) {
     const key = `${courseId}_final_${studentId}`;
 
     if (value === '' || isNaN(value)) {
-        // Special case: we need an 'unset' or delete method in service if we want total parity
-        // For now, let's use internal db access if we must, but strive for service
-        if (dataService.deleteGrade) {
-            await dataService.deleteGrade(key);
-        } else {
-            delete dataService.db.grades[key];
-            await dataService._save();
-        }
+        await dataService.deleteGrade(key);
     } else {
         await dataService.setGrade(key, Number(value));
     }
@@ -500,7 +474,7 @@ async function exportAttendanceCSV() {
         if (c.students) {
             c.students.forEach((s) => {
                 const status = attendance[`today_${c.id}_${s.id}`] || 'Pendiente';
-                csv += `"${c.name}","${s.name}",${status}\n`;
+                csv += `"${c.nombre}","${s.name}",${status}\n`;
             });
         }
     });
@@ -517,7 +491,7 @@ async function exportGradesCSV() {
             c.students.forEach(s => {
                 const finalGradeKey = `${c.id}_final_${s.id}`;
                 const val = grades[finalGradeKey] || '-';
-                csv += `"${c.name}","${s.name}",${val}\n`;
+                csv += `"${c.nombre}","${s.name}",${val}\n`;
             });
         }
     });
@@ -533,10 +507,22 @@ async function populateCourseSelect() {
         select.innerHTML = '<option value="" disabled selected>Primero debes crear un curso</option>';
         select.disabled = true;
     } else {
-        const currentValue = select.value;
         select.innerHTML = '<option value="" disabled selected>Seleccionar Curso</option>' +
-            courses.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-        if (currentValue) select.value = currentValue;
+            courses.map(c => `<option value="${c.id}">${c.nombre} (${c.año})</option>`).join('');
+        select.disabled = false;
+    }
+}
+
+async function updateCourseSelector() {
+    const select = document.getElementById('registro-course');
+    const courses = await dataService.getCourses();
+
+    if (courses.length === 0) {
+        select.innerHTML = '<option value="" disabled selected>Primero debes crear un curso</option>';
+        select.disabled = true;
+    } else {
+        select.innerHTML = '<option value="" disabled selected>Seleccionar Curso</option>' +
+            courses.map(c => `<option value="${c.id}">${c.nombre} (${c.año})</option>`).join('');
         select.disabled = false;
     }
 }
@@ -548,24 +534,24 @@ async function openNewClassModal() {
 
 async function handleNewClassRecord(e) {
     e.preventDefault();
-    const courseId = Number(document.getElementById('registro-course').value);
-    const date = document.getElementById('registro-date').value;
-    const topic = document.getElementById('registro-topic').value;
+    const cursoId = Number(document.getElementById('registro-course').value);
+    const fecha = document.getElementById('registro-date').value;
+    const tema = document.getElementById('registro-topic').value;
     const notes = document.getElementById('registro-notes').value;
     const homework = document.getElementById('registro-homework').value;
 
-    if (!courseId || !date || !topic) return;
+    if (!cursoId || !fecha || !tema) return;
 
     const newRecord = {
         id: Date.now(),
-        courseId,
-        date,
-        topic,
+        cursoId,
+        fecha,
+        tema,
         notes,
         homework
     };
 
-    await dataService.addClassRecord(newRecord);
+    await dataService.addClass(newRecord);
     await renderClassRecords();
     closeModal('registro-modal');
     showToast('Clase registrada correctamente');
@@ -574,7 +560,7 @@ async function handleNewClassRecord(e) {
 
 async function deleteClassRecord(id) {
     if (!confirm('¿Eliminar este registro de clase?')) return;
-    await dataService.deleteClassRecord(id);
+    await dataService.deleteClass(id);
     await renderClassRecords();
     showToast('Registro eliminado');
 }
@@ -589,6 +575,61 @@ function downloadCSV(csv, filename) {
     showToast('Archivo Excel (CSV) generado');
 }
 
+// --- NUEVA SECCIÓN: GESTIÓN DE CURSOS ---
+async function renderGestionCursos() {
+    const list = document.getElementById('gestion-courses-list');
+    const courses = await dataService.getCourses();
+    list.innerHTML = courses.map(c => `
+        <article class="bg-white dark:bg-slate-800 rounded-3xl overflow-hidden border border-slate-100 dark:border-slate-800 shadow-sm relative group">
+            <div class="h-28 relative" style="background: linear-gradient(135deg, ${c.color} 0%, #6394ff 100%);">
+                <div class="absolute top-4 right-4 bg-white/20 backdrop-blur-md text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">${c.schedule} • ${c.año}</div>
+                <div class="absolute top-4 left-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button onclick="openEditCourse(${c.id})" class="size-8 bg-white/20 hover:bg-white/40 backdrop-blur-md text-white rounded-full flex items-center justify-center transition-colors">
+                        <span class="material-symbols-outlined text-[16px]">edit</span>
+                    </button>
+                    <button onclick="deleteCourseRequest(${c.id})" class="size-8 bg-white/20 hover:bg-rose-500/80 backdrop-blur-md text-white rounded-full flex items-center justify-center transition-colors">
+                        <span class="material-symbols-outlined text-[16px]">delete</span>
+                    </button>
+                </div>
+            </div>
+            <div class="p-5">
+                <h3 class="text-xl font-bold mb-1">${c.nombre}</h3>
+                <p class="text-xs text-slate-500">${c.students.length} Estudiantes inscritos</p>
+            </div>
+        </article>
+    `).join('');
+}
+
+async function handleAddCourseFromGestion(e) {
+    e.preventDefault();
+    const nombre = document.getElementById('course-name').value;
+    const año = document.getElementById('course-year').value;
+    const day = document.getElementById('course-day').value;
+    const schedule = document.getElementById('course-schedule').value;
+    const newCourse = {
+        id: Date.now(),
+        nombre,
+        año,
+        day,
+        schedule,
+        progress: 0,
+        color: '#2b6cee',
+        students: []
+    };
+    await dataService.addCourse(newCourse);
+    await renderGestionCursos();
+    closeModal('course-modal');
+    showToast('Curso añadido desde Gestión');
+    e.target.reset();
+}
+
+async function handleDeleteCourseFromGestion(courseId) {
+    if (!confirm('¿Eliminar este curso y todos sus datos asociados?')) return;
+    await dataService.deleteCourse(courseId);
+    await renderGestionCursos();
+    showToast('Curso eliminado desde Gestión');
+}
+
 // Init
 window.addEventListener('load', async () => {
     // Service Worker Registration
@@ -599,10 +640,8 @@ window.addEventListener('load', async () => {
     }
 
     const currentDB = await dataService.getFullDB();
-
-    // Incrementar contador de carga
-    currentDB.loadCount = (currentDB.loadCount || 0) + 1;
-    await dataService._save();
+    const newLoadCount = (currentDB.loadCount || 0) + 1;
+    await dataService.updateSettings({ loadCount: newLoadCount });
 
     const settings = await dataService.getSettings();
     if (settings.darkMode) document.documentElement.classList.add('dark');
@@ -615,5 +654,5 @@ window.addEventListener('load', async () => {
     }
 
     await navigate('cursos');
-    console.log(`Sesión #${currentDB.loadCount} iniciada.`);
+    console.log(`Sesión #${newLoadCount} iniciada.`);
 });

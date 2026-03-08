@@ -28,9 +28,9 @@ async function generateSmartRecord() {
     const courses = await dataService.getCourses();
     if (courses && courses.length > 0) {
         // Sort courses by length descending to match longer specific names first
-        const sortedCourses = [...courses].sort((a, b) => b.name.length - a.name.length);
+        const sortedCourses = [...courses].sort((a, b) => b.nombre.length - a.nombre.length);
         for (const course of sortedCourses) {
-            if (lowerText.includes(course.name.toLowerCase())) {
+            if (lowerText.includes(course.nombre.toLowerCase())) {
                 detectedCourseId = course.id;
                 break;
             }

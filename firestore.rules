@@ -1,0 +1,45 @@
+﻿rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isTeacher(teacherId) {
+      return signedIn() && request.auth.uid == teacherId;
+    }
+
+    function ownsCourse(courseId) {
+      return signedIn() &&
+        get(/databases/$(database)/documents/courses/$(courseId)).data.teacherId == request.auth.uid;
+    }
+
+    function isValidStatus() {
+      return request.resource.data.status in ['present', 'absent', 'late'];
+    }
+
+    match /teachers/{teacherId} {
+      allow read, write: if isTeacher(teacherId);
+    }
+
+    match /courses/{courseId} {
+      allow create: if signedIn() && request.resource.data.teacherId == request.auth.uid;
+      allow read, update, delete: if signedIn() && resource.data.teacherId == request.auth.uid;
+
+      match /students/{studentId} {
+        allow read, write: if ownsCourse(courseId);
+      }
+
+      match /attendance/{date} {
+        allow create, update: if ownsCourse(courseId) && request.resource.data.teacherId == request.auth.uid;
+        allow read, delete: if ownsCourse(courseId);
+
+        match /records/{studentId} {
+          allow create, update: if ownsCourse(courseId) && isValidStatus();
+          allow read, delete: if ownsCourse(courseId);
+        }
+      }
+    }
+  }
+}

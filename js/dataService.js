@@ -120,159 +120,190 @@ class DataService {
         }
     }
     // --- Class Records CRUD ---
-    async addClass(record) {
-        // Si no tiene id, asignar uno
-        if (!record.id) {
-            if (window.crypto && window.crypto.randomUUID) {
-                record.id = window.crypto.randomUUID();
-            } else {
-                record.id = 'id_' + Date.now() + '_' + Math.floor(Math.random()*1000000);
+    // helper constants
+    const CLASSES_KEY = 'agenda_docente_clases';
+    const COURSES_KEY = 'agenda_docente_cursos';
+    const SETTINGS_KEY = 'agenda_docente_settings';
+
+    function ensureClassIds(classes) {
+        let changed = false;
+        for (const c of classes) {
+            if (!c.id) {
+                if (window.crypto && window.crypto.randomUUID) {
+                    c.id = window.crypto.randomUUID();
+                } else {
+                    c.id = 'id_' + Date.now() + '_' + Math.floor(Math.random()*1000000);
+                }
+                changed = true;
             }
         }
-        this.db.classRecords.push(record);
-        return this._save();
+        return changed;
     }
 
-    async deleteClass(classId) {
-
-        // dataService.js - Capa centralizada para gestión de clases en localStorage
-
-
-        const CLASSES_KEY = 'agenda_docente_clases';
-        const COURSES_KEY = 'agenda_docente_cursos';
-
-        function ensureClassIds(classes) {
-            let changed = false;
-            for (const c of classes) {
-                if (!c.id) {
-                    if (window.crypto && window.crypto.randomUUID) {
-                        c.id = window.crypto.randomUUID();
-                    } else {
-                        c.id = 'id_' + Date.now() + '_' + Math.floor(Math.random()*1000000);
-                    }
-                    changed = true;
+    function ensureCourseIds(courses) {
+        let changed = false;
+        for (const c of courses) {
+            if (!c.id) {
+                if (window.crypto && window.crypto.randomUUID) {
+                    c.id = window.crypto.randomUUID();
+                } else {
+                    c.id = 'id_' + Date.now() + '_' + Math.floor(Math.random()*1000000);
                 }
+                changed = true;
             }
-            return changed;
         }
+        return changed;
+    }
 
-        function ensureCourseIds(courses) {
-            let changed = false;
-            for (const c of courses) {
-                if (!c.id) {
-                    if (window.crypto && window.crypto.randomUUID) {
-                        c.id = window.crypto.randomUUID();
-                    } else {
-                        c.id = 'id_' + Date.now() + '_' + Math.floor(Math.random()*1000000);
-                    }
-                    changed = true;
-                }
-            }
-            return changed;
+    // Settings helpers
+    function getSettings() {
+        const data = localStorage.getItem(SETTINGS_KEY);
+        try {
+            return data ? JSON.parse(data) : {};
+        } catch (e) {
+            return {};
         }
+    }
 
-        function getClasses() {
-            const data = localStorage.getItem(CLASSES_KEY);
-            let classes;
-            try {
-                classes = data ? JSON.parse(data) : [];
-            } catch (e) {
-                classes = [];
-            }
-            // Compatibilidad: asignar id a los que no tengan
-            let changed = ensureClassIds(classes);
+    function updateSettings(updates) {
+        const settings = getSettings();
+        Object.assign(settings, updates);
+        localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+        return settings;
+    }
 
-            // Migración: si alguna clase tiene 'course' como texto, crear curso y asociar
-            let courses = getCourses();
-            let coursesChanged = false;
-            for (const c of classes) {
-                if (typeof c.course === 'string' && !c.courseId) {
-                    // Buscar si ya existe un curso con ese nombre
-                    let found = courses.find(k => k.name === c.course);
-                    if (!found) {
-                        found = { id: (window.crypto && window.crypto.randomUUID) ? window.crypto.randomUUID() : ('id_' + Date.now() + '_' + Math.floor(Math.random()*1000000)), name: c.course };
-                        courses.push(found);
-                        coursesChanged = true;
-                    }
-                    c.courseId = found.id;
-                    delete c.course;
-                    changed = true;
-                }
+    function setUserName(name) {
+        updateSettings({ userName: name });
+    }
+
+    function getUserName() {
+        return getSettings().userName || null;
+    }
+
+    // Classes with optional Firestore sync
+    async function getClasses() {
+        const settings = getSettings();
+        if (settings.userUid && window.firebaseDb) {
+            // fetch from Firestore
+            const snap = await window.firebaseDb
+                .collection('users').doc(settings.userUid)
+                .collection('classes').get();
+            let classes = snap.docs.map(d => d.data());
+            if (ensureClassIds(classes)) {
+                saveClasses(classes); // keep local copy
             }
-            if (changed) saveClasses(classes);
-            if (coursesChanged) saveCourses(courses);
             return classes;
         }
-
-        function saveClasses(classes) {
-            localStorage.setItem(CLASSES_KEY, JSON.stringify(classes));
+        // fallback to localStorage
+        const data = localStorage.getItem(CLASSES_KEY);
+        let classes;
+        try {
+            classes = data ? JSON.parse(data) : [];
+        } catch (e) {
+            classes = [];
         }
-
-        function addClass(newClass) {
-            const classes = getClasses();
-            if (!newClass.id) {
-                if (window.crypto && window.crypto.randomUUID) {
-                    newClass.id = window.crypto.randomUUID();
-                } else {
-                    newClass.id = 'id_' + Date.now() + '_' + Math.floor(Math.random()*1000000);
-                }
-            }
-            classes.push(newClass);
-            saveClasses(classes);
-        }
-// --- Cursos ---
-function getCourses() {
-    const data = localStorage.getItem(COURSES_KEY);
-    let courses;
-    try {
-        courses = data ? JSON.parse(data) : [];
-    } catch (e) {
-        courses = [];
+        if (ensureClassIds(classes)) saveClasses(classes);
+        return classes;
     }
-    if (ensureCourseIds(courses)) {
+
+    async function saveClasses(classes) {
+        localStorage.setItem(CLASSES_KEY, JSON.stringify(classes));
+    }
+
+    async function addClass(newClass) {
+        if (!newClass.id) {
+            if (window.crypto && window.crypto.randomUUID) {
+                newClass.id = window.crypto.randomUUID();
+            } else {
+                newClass.id = 'id_' + Date.now() + '_' + Math.floor(Math.random()*1000000);
+            }
+        }
+        const classes = await getClasses();
+        classes.push(newClass);
+        await saveClasses(classes);
+        const settings = getSettings();
+        if (settings.userUid && window.firebaseDb) {
+            await window.firebaseDb
+                .collection('users').doc(settings.userUid)
+                .collection('classes').doc(newClass.id.toString())
+                .set(newClass);
+        }
+    }
+
+    async function deleteClass(classId) {
+        let classes = await getClasses();
+        classes = classes.filter(c => c.id !== classId);
+        await saveClasses(classes);
+        const settings = getSettings();
+        if (settings.userUid && window.firebaseDb) {
+            await window.firebaseDb
+                .collection('users').doc(settings.userUid)
+                .collection('classes').doc(classId.toString())
+                .delete();
+        }
+    }
+
+    async function updateClass(updatedClass) {
+        let classes = await getClasses();
+        classes = classes.map(c => c.id === updatedClass.id ? { ...c, ...updatedClass } : c);
+        await saveClasses(classes);
+        const settings = getSettings();
+        if (settings.userUid && window.firebaseDb) {
+            await window.firebaseDb
+                .collection('users').doc(settings.userUid)
+                .collection('classes').doc(updatedClass.id.toString())
+                .set(updatedClass, { merge: true });
+        }
+    }
+
+    // --- Cursos (local only) ---
+    function getCourses() {
+        const data = localStorage.getItem(COURSES_KEY);
+        let courses;
+        try {
+            courses = data ? JSON.parse(data) : [];
+        } catch (e) {
+            courses = [];
+        }
+        if (ensureCourseIds(courses)) {
+            saveCourses(courses);
+        }
+        return courses;
+    }
+
+    function saveCourses(courses) {
+        localStorage.setItem(COURSES_KEY, JSON.stringify(courses));
+    }
+
+    function addCourse(course) {
+        const courses = getCourses();
+        if (!course.id) {
+            if (window.crypto && window.crypto.randomUUID) {
+                course.id = window.crypto.randomUUID();
+            } else {
+                course.id = 'id_' + Date.now() + '_' + Math.floor(Math.random()*1000000);
+            }
+        }
+        courses.push(course);
         saveCourses(courses);
     }
-    return courses;
+
+    // Export global functions
+    window.dataService = {
+        // Settings
+        getSettings,
+        updateSettings,
+        setUserName,
+        getUserName,
+        // Clases
+        getClasses,
+        addClass,
+        deleteClass,
+        updateClass,
+        saveClasses,
+        // Cursos
+        getCourses,
+        saveCourses,
+        addCourse
+    };
 }
-
-function saveCourses(courses) {
-    localStorage.setItem(COURSES_KEY, JSON.stringify(courses));
-}
-
-function addCourse(course) {
-    const courses = getCourses();
-    if (!course.id) {
-        if (window.crypto && window.crypto.randomUUID) {
-            course.id = window.crypto.randomUUID();
-        } else {
-            course.id = 'id_' + Date.now() + '_' + Math.floor(Math.random()*1000000);
-        }
-    }
-    courses.push(course);
-    saveCourses(courses);
-}
-
-        function deleteClass(classId) {
-            const classes = getClasses().filter(c => c.id !== classId);
-            saveClasses(classes);
-        }
-
-        function updateClass(updatedClass) {
-            const classes = getClasses().map(c => c.id === updatedClass.id ? { ...c, ...updatedClass } : c);
-            saveClasses(classes);
-        }
-
-        // Exportar funciones globalmente para compatibilidad
-        window.dataService = {
-            // Clases
-            getClasses,
-            saveClasses,
-            addClass,
-            deleteClass,
-            updateClass,
-            // Cursos
-            getCourses,
-            saveCourses,
-            addCourse
-        };
-    }

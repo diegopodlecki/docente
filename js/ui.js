@@ -88,6 +88,10 @@ function renderDashboard() {
             `;
         }).join('');
     }
+
+    if (typeof renderStatistics === 'function') {
+        renderStatistics();
+    }
 }
 
 function renderWeeklyAgenda() {
@@ -136,6 +140,12 @@ function renderClassRecords(filter = '') {
     // Use a copy to avoid in-place sorting side effects. Sort by date DESC, then ID DESC.
     let records = [...db.classRecords].sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id);
 
+    // Actualizar el contador total/filtrado
+    const updateCounter = (count) => {
+        const counter = document.getElementById('registro-total-count');
+        if (counter) counter.textContent = count;
+    };
+
     if (query) {
         records = records.filter(r => {
             const course = db.courses.find(c => c.id === r.courseId);
@@ -143,13 +153,17 @@ function renderClassRecords(filter = '') {
             const topic = (r.topic || '').toLowerCase();
             const notes = (r.notes || '').toLowerCase();
             const homework = (r.homework || '').toLowerCase();
+            const date = (r.date || '').toLowerCase();
 
             return courseName.includes(query) ||
                 topic.includes(query) ||
                 notes.includes(query) ||
-                homework.includes(query);
+                homework.includes(query) ||
+                date.includes(query);
         });
     }
+
+    updateCounter(records.length);
 
     if (records.length === 0) {
         list.innerHTML = `

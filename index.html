@@ -128,6 +128,15 @@
                 <div id="dash-recent-list" class="space-y-3 mb-8">
                     <!-- Dynamic recent records -->
                 </div>
+
+                <!-- ESTADÍSTICAS DOCENTES -->
+                <div class="mb-2">
+                    <h3 class="text-sm font-bold uppercase tracking-widest text-slate-400">Estadísticas Docentes</h3>
+                </div>
+                <div id="dash-stats-grid" class="grid grid-cols-2 gap-3 mb-8">
+                    <!-- Dynamic stats -->
+                </div>
+
                 <div class="h-px bg-slate-100 dark:bg-slate-800 w-full mb-6"></div>
             </div>
 
@@ -217,6 +226,16 @@
                         </button>
                     </div>
 
+                    <div
+                        class="flex items-center justify-between bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded-2xl border border-emerald-100 dark:border-emerald-800/30">
+                        <p class="text-sm font-bold text-emerald-700 dark:text-emerald-400">Total: <span
+                                id="registro-total-count">0</span> clases</p>
+                        <button onclick="exportToCSV()"
+                            class="flex items-center gap-1 text-xs font-bold bg-white dark:bg-slate-800 px-3 py-1.5 rounded-lg shadow-sm text-emerald-600 dark:text-emerald-400 active:scale-95 transition-transform">
+                            <span class="material-symbols-outlined text-sm">download</span> Excel
+                        </button>
+                    </div>
+
                     <!-- BUSCADOR -->
                     <label for="registro-search" class="relative block cursor-text">
                         <span
@@ -237,6 +256,43 @@
                     <h2 class="text-2xl font-bold">Agenda Semanal</h2>
                     <div id="weekly-agenda-list" class="space-y-8">
                         <!-- Grouped by day -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: CALENDARIO -->
+            <section id="view-calendario" class="view-section">
+                <div class="px-4 pt-6 space-y-6">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-2xl font-bold">Calendario</h2>
+                        <div class="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
+                            <button onclick="changeMonth(-1)" class="p-1 hover:text-primary"><span
+                                    class="material-symbols-outlined text-sm">chevron_left</span></button>
+                            <span id="calendar-month-year"
+                                class="text-sm font-bold min-w-[100px] text-center capitalize"></span>
+                            <button onclick="changeMonth(1)" class="p-1 hover:text-primary"><span
+                                    class="material-symbols-outlined text-sm">chevron_right</span></button>
+                        </div>
+                    </div>
+
+                    <div
+                        class="bg-white dark:bg-slate-800 p-4 rounded-3xl border border-slate-100 dark:border-slate-800">
+                        <div class="grid grid-cols-7 gap-1 text-center mb-2">
+                            <div class="text-[10px] font-bold text-slate-400">Do</div>
+                            <div class="text-[10px] font-bold text-slate-400">Lu</div>
+                            <div class="text-[10px] font-bold text-slate-400">Ma</div>
+                            <div class="text-[10px] font-bold text-slate-400">Mi</div>
+                            <div class="text-[10px] font-bold text-slate-400">Ju</div>
+                            <div class="text-[10px] font-bold text-slate-400">Vi</div>
+                            <div class="text-[10px] font-bold text-slate-400">Sa</div>
+                        </div>
+                        <div id="calendar-grid" class="grid grid-cols-7 gap-1">
+                            <!-- Rendered visually -->
+                        </div>
+                    </div>
+
+                    <div id="calendar-day-details" class="space-y-4">
+                        <!-- Selected day details -->
                     </div>
                 </div>
             </section>
@@ -270,6 +326,12 @@
                 <span class="material-symbols-outlined text-[28px]">monitoring</span>
                 <p class="text-[10px] font-medium mt-1">Notas</p>
             </button>
+            <button onclick="navigate('calendario')"
+                class="nav-btn transition-transform active:scale-95 text-slate-400 dark:text-slate-500"
+                data-view="calendario">
+                <span class="material-symbols-outlined text-[28px]">calendar_month</span>
+                <p class="text-[10px] font-medium mt-1">Calendario</p>
+            </button>
             <button onclick="navigate('registro')"
                 class="nav-btn transition-transform active:scale-95 text-slate-400 dark:text-slate-500"
                 data-view="registro">
@@ -279,7 +341,7 @@
             <button onclick="navigate('agenda')"
                 class="nav-btn transition-transform active:scale-95 text-slate-400 dark:text-slate-500"
                 data-view="agenda">
-                <span class="material-symbols-outlined text-[28px]">calendar_view_week</span>
+                <span class="material-symbols-outlined text-[28px]">view_week</span>
                 <p class="text-[10px] font-medium mt-1">Agenda</p>
             </button>
         </nav>
@@ -449,14 +511,46 @@
             <div class="absolute bottom-0 left-0 right-0 bg-white dark:bg-slate-900 rounded-t-[32px] p-6 max-w-md mx-auto shadow-2xl transition-transform transform translate-y-full max-h-[90vh] overflow-y-auto"
                 id="registro-modal-panel">
                 <div class="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mx-auto mb-6"></div>
-                <h3 class="text-xl font-bold mb-6 text-center">Registrar Nueva Clase</h3>
+
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-bold">Registrar Nueva Clase</h3>
+                </div>
+
+                <!-- REGISTRO INTELIGENTE -->
+                <div
+                    class="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-3xl border border-indigo-100 dark:border-indigo-800/30 mb-6">
+                    <p
+                        class="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider mb-2 flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">magic_button</span>
+                        Registro Inteligente
+                    </p>
+                    <textarea id="smart-text"
+                        placeholder="Describe la clase libremente...&#10;Ej: Ayer en Física Avanzada vimos las Leyes de Newton. Tarea: ejercicios 1 al 5."
+                        rows="3"
+                        class="w-full bg-white dark:bg-slate-800 border-none rounded-2xl p-4 focus:ring-2 focus:ring-indigo-400 text-sm mb-3 shadow-inner"></textarea>
+                    <button type="button" onclick="generateSmartRecord()"
+                        class="w-full bg-indigo-100 dark:bg-indigo-800/50 text-indigo-700 dark:text-indigo-300 font-bold py-3 rounded-2xl active:scale-95 transition-all text-sm flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined text-lg">auto_awesome</span>
+                        Generar Registro
+                    </button>
+                    <div id="smart-feedback" class="text-xs text-indigo-600 font-medium mt-2 text-center hidden">¡Campos
+                        autocompletados! Revisa abajo:</div>
+                </div>
+
+                <div class="relative flex py-3 items-center mb-4">
+                    <div class="flex-grow border-t border-slate-200 dark:border-slate-700"></div>
+                    <span class="flex-shrink-0 mx-4 text-slate-400 text-xs font-medium uppercase">O completa
+                        manual</span>
+                    <div class="flex-grow border-t border-slate-200 dark:border-slate-700"></div>
+                </div>
+
                 <form onsubmit="handleNewClassRecord(event)" class="space-y-4">
                     <select id="registro-course" required
-                        class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary h-14">
+                        class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary h-14 transition-all duration-300">
                         <option value="" disabled selected>Seleccionar Curso</option>
                     </select>
                     <input type="date" id="registro-date" required
-                        class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary h-14">
+                        class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary h-14 transition-all duration-300">
                     <input type="text" id="registro-topic" placeholder="Tema visto (ej: Álgebra)" required
                         class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-2xl p-4 focus:ring-2 focus:ring-primary h-14">
                     <textarea id="registro-notes" placeholder="Notas de la clase" rows="3"
@@ -513,14 +607,14 @@
                         <h4 class="text-xs font-black uppercase tracking-widest text-slate-400">Datos y Sincronización
                         </h4>
                         <div class="grid grid-cols-1 gap-3">
-                            <button onclick="exportDataJSON()"
+                            <button onclick="exportBackup()"
                                 class="flex items-center gap-4 w-full p-4 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm active:scale-95 transition-all">
                                 <div
                                     class="size-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center">
                                     <span class="material-symbols-outlined">backup</span>
                                 </div>
                                 <div class="text-left">
-                                    <p class="font-bold text-sm">Copia de Seguridad</p>
+                                    <p class="font-bold text-sm">Exportar Backup</p>
                                     <p class="text-[10px] text-slate-500">Descarga tus datos en un archivo JSON</p>
                                 </div>
                             </button>
@@ -531,11 +625,11 @@
                                     <span class="material-symbols-outlined">restore</span>
                                 </div>
                                 <div class="text-left">
-                                    <p class="font-bold text-sm">Restaurar Copia</p>
+                                    <p class="font-bold text-sm">Importar Backup</p>
                                     <p class="text-[10px] text-slate-500">Carga un archivo JSON previo</p>
                                 </div>
                                 <input type="file" id="import-file" class="hidden" accept=".json"
-                                    onchange="importDataJSON(event)">
+                                    onchange="importBackup(event)">
                             </label>
                         </div>
                     </div>
@@ -559,6 +653,11 @@
 
     <script src="js/storage.js"></script>
     <script src="js/ui.js"></script>
+    <script src="js/calendario.js"></script>
+    <script src="js/estadisticas.js"></script>
+    <script src="js/exportar.js"></script>
+    <script src="js/backup.js"></script>
+    <script src="js/inteligente.js"></script>
     <script src="js/app.js"></script>
 </body>
 

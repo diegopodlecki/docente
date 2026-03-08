@@ -21,37 +21,6 @@ function save() {
     localStorage.setItem('docente_app_db', JSON.stringify(db));
 }
 
-// --- DATA SYNC & EXCEL ---
-function exportDataJSON() {
-    const blob = new Blob([JSON.stringify(db, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `docente_pro_backup_${new Date().toISOString().split('T')[0]}.json`;
-    a.click();
-    if (typeof showToast === 'function') showToast('Copia de seguridad descargada');
-}
-
-function importDataJSON(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (event) => {
-        try {
-            const imported = JSON.parse(event.target.result);
-            if (imported.courses && imported.tasks) {
-                db = imported;
-                save();
-                location.reload();
-            } else {
-                alert('El archivo no parece ser una copia válida de Docente Pro.');
-            }
-        } catch (err) {
-            alert('Error al leer el archivo.');
-        }
-    };
-    reader.readAsText(file);
-}
-
-// Make sure it's accessible globally if needed in a module system,
-// since we're using simple script tags it will be added to window automatically.
+// --- DATA SYNC ---
+// Backup logic moved to js/backup.js
+// Export logic moved to js/exportar.js

@@ -6,7 +6,7 @@ function navigate(viewId) {
     document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
     document.getElementById('view-' + viewId).classList.add('active');
 
-    const titles = { 'cursos': 'Mis Cursos', 'asistencia': 'Asistencia', 'tareas': 'Tareas', 'notas': 'Rendimiento', 'registro': 'Registro', 'agenda': 'Agenda Semanal' };
+    const titles = { 'cursos': 'Mis Cursos', 'asistencia': 'Asistencia', 'tareas': 'Tareas', 'notas': 'Rendimiento', 'registro': 'Registro', 'agenda': 'Agenda Semanal', 'calendario': 'Calendario' };
     document.getElementById('header-title').textContent = titles[viewId];
 
     document.querySelectorAll('.nav-btn').forEach(btn => {
@@ -44,6 +44,9 @@ function navigate(viewId) {
         populateCourseSelect();
     }
     if (viewId === 'agenda') renderWeeklyAgenda();
+    if (viewId === 'calendario' && typeof renderCalendar === 'function') {
+        renderCalendar();
+    }
 }
 
 function navigateAndFocusSearch() {

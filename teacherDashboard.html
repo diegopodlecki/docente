@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Profesor - Asistencia</title>
+    <style>
+        body {font-family: Arial, sans-serif; background:#f5f5f5; margin:0;}
+        .container {max-width:800px; margin:2rem auto; background:white; padding:2rem; box-shadow:0 2px 8px rgba(0,0,0,.1);}
+        h1 {margin-top:0;}
+        select, button {padding:.5rem 1rem; font-size:1rem;}
+        #students {margin-top:2rem;}
+        .student {display:flex; align-items:center; justify-content:space-between; padding:.5rem 0; border-bottom:1px solid #eee;}
+        .student:last-child{border:none;}
+        .status-buttons button {margin-right:.5rem;}
+        .status-present {background:#4caf50; color:white;}
+        .status-absent {background:#f44336; color:white;}
+        .status-late {background:#ff9800; color:white;}
+        .selected {outline:2px solid #000;}
+        #saveBtn {margin-top:1.5rem; background:#2196f3; color:white; border:none; cursor:pointer;}
+        #saveBtn:disabled {opacity:.5; cursor:not-allowed;}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Asistencia de Clase</h1>
+        <div>
+            <label for="courseSelect">Curso:</label>
+            <select id="courseSelect"><option value="">-- cargar cursos --</option></select>
+        </div>
+        <div id="students"></div>
+        <button id="saveBtn" disabled>Guardar asistencia</button>
+    </div>
+
+    <script>
+        const courseSelect = document.getElementById('courseSelect');
+        const studentsDiv = document.getElementById('students');
+        const saveBtn = document.getElementById('saveBtn');
+
+        let currentStudents = [];
+
+        async function loadCourses() {
+            try {
+                const res = await fetch('/classroom/courses');
+                const data = await res.json();
+                courseSelect.innerHTML = '<option value="">-- seleccionar curso --</option>';
+                data.courses.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c.id;
+                    opt.textContent = c.name || c.courseState || '(sin nombre)';
+                    courseSelect.appendChild(opt);
+                });
+            } catch (err) {
+                console.error(err);
+                courseSelect.innerHTML = '<option value="">Error cargando cursos</option>';
+            }
+        }
+
+        async function loadStudents(courseId) {
+            studentsDiv.innerHTML = 'Cargando alumnos...';
+            saveBtn.disabled = true;
+            try {
+                const res = await fetch(`/classroom/courses/${courseId}/students`);
+                const data = await res.json();
+                currentStudents = data.students.map(s => ({...s, status: null}));
+                renderStudents();
+            } catch (err) {
+                console.error(err);
+                studentsDiv.innerHTML = '<p>Error cargando alumnos</p>';
+            }
+        }
+
+        function renderStudents() {
+            studentsDiv.innerHTML = '';
+            currentStudents.forEach((s, idx) => {
+                const div = document.createElement('div');
+                div.className = 'student';
+                div.innerHTML = `
+                    <span>${s.fullName || s.name || '(sin nombre)'}</span>
+                    <div class="status-buttons">
+                        <button data-status="present">P</button>
+                        <button data-status="absent">A</button>
+                        <button data-status="late">T</button>
+                    </div>
+                `;
+                const buttons = div.querySelectorAll('button');
+                buttons.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        currentStudents[idx].status = btn.dataset.status;
+                        ``
+                        buttons.forEach(b => b.classList.remove('selected'));
+                        btn.classList.add('selected');
+                        saveBtn.disabled = currentStudents.every(st => st.status !== null) ? false : true;
+                    });
+                });
+                studentsDiv.appendChild(div);
+            });
+        }
+
+        saveBtn.addEventListener('click', async () => {
+            const courseId = courseSelect.value;
+            const date = new Date().toISOString().split('T')[0];
+            const records = currentStudents.map(s => ({ studentId: s.id, status: s.status }));
+            try {
+                const resp = await fetch('/attendance', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ courseId, date, records })
+                });
+                if (!resp.ok) throw new Error('HTTP ' + resp.status);
+                alert('Asistencia guardada');
+            } catch (err) {
+                console.error(err);
+                alert('Error al guardar');
+            }
+        });
+
+        courseSelect.addEventListener('change', () => {
+            const cid = courseSelect.value;
+            if (cid) loadStudents(cid);
+            else studentsDiv.innerHTML = '';
+        });
+
+        loadCourses();
+    </script>
+</body>
+</html>

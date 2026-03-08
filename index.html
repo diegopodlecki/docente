@@ -85,7 +85,7 @@
 
             <div class="px-4 py-4">
                 <button onclick="loginGoogle()" class="w-full bg-primary text-white py-3 rounded-2xl font-bold shadow-lg">
-                    Conectar con Google Classroom
+                    Login con Google
                 </button>
             </div>
 
@@ -390,10 +390,43 @@
 
         </main>
 
-<script>
-function loginGoogle(){
-    window.location.href = "http://localhost:3000/auth/google";
-}
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+
+// Configuración de tu proyecto Firebase
+const firebaseConfig = {
+  apiKey: "TU_API_KEY",
+  authDomain: "docente-web.firebaseapp.com",
+  projectId: "docente-web",
+  storageBucket: "docente-web.firebasestorage.app",
+  messagingSenderId: "240484844169",
+  appId: "1:240484844169:web:25c35da755ccf319657c58"
+};
+
+// Inicializar Firebase
+const app = initializeApp(firebaseConfig);
+
+// Inicializar servicios
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// Login con Google
+const provider = new GoogleAuthProvider();
+
+window.loginGoogle = async function () {
+  try {
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
+
+    console.log("Usuario logueado:", user.displayName);
+    alert("Bienvenido " + user.displayName);
+
+  } catch (error) {
+    console.error(error);
+  }
+};
 </script>
 
         <!-- Navigation Bar -->

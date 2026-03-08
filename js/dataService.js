@@ -180,6 +180,36 @@ class DataService {
         return getSettings().userName || null;
     }
 
+    // Read classes directly from localStorage ignoring Firestore
+    function getLocalClasses() {
+        const data = localStorage.getItem(CLASSES_KEY);
+        let classes;
+        try {
+            classes = data ? JSON.parse(data) : [];
+        } catch (e) {
+            classes = [];
+        }
+        if (ensureClassIds(classes)) saveClasses(classes);
+        return classes;
+    }
+
+    // Perform one-time migration of local classes to Firestore for authenticated user
+    async function migrateLocalToFirestore() {
+        const settings = getSettings();
+        if (!settings.userUid || settings.migratedToCloud || !window.firebaseDb) return;
+        const ref = window.firebaseDb
+            .collection('users').doc(settings.userUid)
+            .collection('classes');
+        const snap = await ref.get();
+        if (snap.empty) {
+            const localClasses = getLocalClasses();
+            for (const c of localClasses) {
+                await ref.doc(c.id.toString()).set(c);
+            }
+        }
+        updateSettings({ migratedToCloud: true });
+    }
+
     // Classes with optional Firestore sync
     async function getClasses() {
         const settings = getSettings();

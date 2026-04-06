@@ -1,9 +1,14 @@
 {
+  "name": "docente-crud",
+  "version": "1.0.0",
+  "description": "Base local para gestion de alumnos con Express y SQLite.",
+  "main": "server/index.js",
+  "scripts": {
+    "dev": "node server/index.js",
+    "start": "node server/index.js"
+  },
   "dependencies": {
-    "dotenv": "^17.3.1",
-    "express": "^5.2.1",
-    "express-session": "^1.19.0",
-    "firebase": "^12.10.0",
-    "googleapis": "^171.4.0"
+    "better-sqlite3": "^11.10.0",
+    "express": "^5.1.0"
   }
 }

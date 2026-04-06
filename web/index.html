@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Docente CRUD</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar">
+        <div>
+          <p class="eyebrow">Agenda Docente</p>
+          <h1>Gestion de alumnos</h1>
+          <p class="sidebar-copy">
+            Base local para administrar alumnos sin depender de servicios externos.
+          </p>
+        </div>
+
+        <div class="sidebar-card">
+          <span class="sidebar-label">Estado</span>
+          <strong>CRUD local activo</strong>
+          <p>Express + SQLite + frontend estatico moderno.</p>
+        </div>
+      </aside>
+
+      <main class="content">
+        <header class="hero">
+          <div>
+            <p class="eyebrow">Panel principal</p>
+            <h2>Seguimiento simple, claro y mantenible</h2>
+          </div>
+          <button id="refresh-button" class="ghost-button" type="button">Actualizar</button>
+        </header>
+
+        <section class="stats-grid">
+          <article class="stat-card">
+            <span>Total de alumnos</span>
+            <strong id="metric-total">0</strong>
+          </article>
+          <article class="stat-card">
+            <span>Cursos con alumnos</span>
+            <strong id="metric-courses">0</strong>
+          </article>
+          <article class="stat-card">
+            <span>Ultima sincronizacion</span>
+            <strong id="metric-sync">Sin datos</strong>
+          </article>
+        </section>
+
+        <section class="dashboard-grid">
+          <article class="panel form-panel">
+            <div class="panel-header">
+              <div>
+                <p class="eyebrow">Formulario</p>
+                <h3 id="form-title">Nuevo alumno</h3>
+              </div>
+            </div>
+
+            <form id="student-form" class="student-form">
+              <input id="student-id" type="hidden" />
+
+              <label>
+                Nombre
+                <input id="nombre" name="nombre" type="text" placeholder="Ana" required />
+              </label>
+
+              <label>
+                Apellido
+                <input id="apellido" name="apellido" type="text" placeholder="Gomez" required />
+              </label>
+
+              <label>
+                Email
+                <input id="email" name="email" type="email" placeholder="ana@escuela.edu" />
+              </label>
+
+              <label>
+                Curso
+                <input id="curso" name="curso" type="text" placeholder="2do B" />
+              </label>
+
+              <label>
+                Observaciones
+                <textarea id="observaciones" name="observaciones" rows="4" placeholder="Notas relevantes del alumno"></textarea>
+              </label>
+
+              <div class="form-actions">
+                <button class="primary-button" type="submit" id="submit-button">Guardar alumno</button>
+                <button class="ghost-button" type="button" id="cancel-button">Cancelar</button>
+              </div>
+            </form>
+          </article>
+
+          <article class="panel table-panel">
+            <div class="panel-header">
+              <div>
+                <p class="eyebrow">Listado</p>
+                <h3>Alumnos registrados</h3>
+              </div>
+              <label class="search-box">
+                <span>Buscar</span>
+                <input id="search-input" type="search" placeholder="Nombre, apellido o curso" />
+              </label>
+            </div>
+
+            <div id="feedback" class="feedback hidden"></div>
+
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Alumno</th>
+                    <th>Curso</th>
+                    <th>Contacto</th>
+                    <th>Observaciones</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="students-table-body">
+                  <tr>
+                    <td colspan="5" class="empty-state">Cargando alumnos...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <script type="module" src="/js/app.js"></script>
+  </body>
+</html>
